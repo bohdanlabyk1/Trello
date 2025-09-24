@@ -1,0 +1,97 @@
+.box-content {
+  display: flex;
+  width: 800px;
+  margin: 50px auto;
+  border: 2px solid #3366ff;  /* <--- РАМКА */
+  border-radius: 12px;         /* <--- ОКРУГЛЕНІ КУТИ */
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  background-color: white;     /* на всякий випадок */
+}
+
+
+/* Ліва частина з формою */
+.form-wrapper {
+  flex: 2;
+  padding: 40px;
+  transition: opacity 0.3s ease-in-out;
+  background-color: #f9f9f9;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+form h1 {
+  margin-bottom: 20px;
+}
+
+form label {
+  margin-top: 10px;
+}
+
+form input[type="text"],
+form input[type="password"] {
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.btn {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #3366ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.btn:hover {
+  background-color: #254eda;
+}
+
+/* Права панель */
+.panel {
+  flex: 1;
+  background-color: #3366ff;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.panel h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.toggle-btn {
+  padding: 10px 20px;
+  background-color: white;
+  color: #3366ff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #3366ff;
+  color: white;
+  border: 1px solid white;
+}

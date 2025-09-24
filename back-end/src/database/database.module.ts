@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/users/model.entity';
+import { Auth } from 'src/auth-user/auth-user.entiti';
 
 @Module({
   imports: [
@@ -9,13 +9,13 @@ import { User } from 'src/users/model.entity';
       host: 'localhost',
       port: 3306, 
       username: 'root', 
-      password: '12345', 
-      database: 'dashboard',
+      password: '1111', 
+      database: 'trello',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [User], 
+      entities: [Auth], 
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Auth]),
   ],
 })
 export class DatabaseModule {}
