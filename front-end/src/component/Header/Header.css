@@ -1,0 +1,85 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #e0e0e0; /* сіра заливка */
+  padding: 10px 20px;
+  height: 60px;
+  box-sizing: border-box;
+}
+
+/* Ліва частина */
+.header__left {
+  display: flex;
+  align-items: center;
+}
+
+.header__logo {
+  font-size: 28px;
+  color: #026aa7;
+  margin-right: 8px;
+}
+
+.header__logo-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Центр */
+.header__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.header__search {
+  width: 60%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+/* Права частина */
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header__icon {
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+}
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 10px;
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f0f0f0;
+}

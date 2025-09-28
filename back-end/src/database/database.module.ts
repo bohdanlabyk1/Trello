@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/auth-user/auth-user.entiti';
+import { Panel } from 'src/panel/panel.entity';
+import { Project } from 'src/progect/project.entiti';
+import { Item } from '../panel/item.entity';
 
 @Module({
   imports: [
@@ -13,9 +16,9 @@ import { Auth } from 'src/auth-user/auth-user.entiti';
       database: 'trello',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [Auth], 
+      entities: [Auth, Project, Panel, Item], 
     }),
-    TypeOrmModule.forFeature([Auth]),
+    TypeOrmModule.forFeature([Auth, Project, Panel, Item]),
   ],
 })
 export class DatabaseModule {}
