@@ -4,6 +4,9 @@ import { Auth } from 'src/auth-user/auth-user.entiti';
 import { Panel } from 'src/panel/panel.entity';
 import { Project } from 'src/progect/project.entiti';
 import { Item } from '../panel/item.entity';
+import { ColumnEntity } from 'src/column/column.entity';
+import { Comment } from 'src/coments/coment.entity';
+import { Task } from 'src/task/task.entity';
 
 @Module({
   imports: [
@@ -16,9 +19,9 @@ import { Item } from '../panel/item.entity';
       database: 'trello',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [Auth, Project, Panel, Item], 
+      entities: [Auth, Project, Panel, Item, ColumnEntity, Comment, Task], 
     }),
-    TypeOrmModule.forFeature([Auth, Project, Panel, Item]),
+    TypeOrmModule.forFeature([Auth, Project, Panel, Item, ColumnEntity, Comment, Task]),
   ],
 })
 export class DatabaseModule {}
