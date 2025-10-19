@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import * as api from './../api/api';
-import { useBoardStore } from './apiboardc';
+import { useProjectStore } from './apiboardc';
 
 const CommentList = ({ taskId, comments, token }) => {
   const [text, setText] = useState('');
-  const { loadComments } = useBoardStore();
+  const { loadComments } = useProjectStore();
 
   const addComment = async () => {
     if (!text) return;

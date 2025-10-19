@@ -2,12 +2,14 @@ const BASE_URL = 'http://localhost:3002';
 
 const fetchData = async (endpoint, options = {}) => {
   try {
+    const token = options.token;
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers, // якщо додаткові заголовки
       },
-      ...options,
     });
 
     if (!response.ok) {
@@ -21,6 +23,20 @@ const fetchData = async (endpoint, options = {}) => {
     throw error;
   }
 };
+
+export const createSprint = (token, { name, startDate, endDate, projectId,}) =>
+  fetchData('/sprints', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ name, startDate, endDate, projectId  }),
+  });
+
+export const getSprintsByProject = (token, projectId) =>
+  fetchData(`/sprints/project/${projectId}`, {
+    method: 'GET',
+    token,
+  });
+
 
 // Auth / Projects
 export const registerUser = (username, email, password, repit_password) =>
@@ -36,14 +52,33 @@ export const loginUser = (email, password) =>
   });
 
 export const createProject = (token, name, description) =>
-  fetchData('/projects/create', {
+  fetchData('/projects', {
     method: 'POST',
     token,
     body: JSON.stringify({ name, description }),
   });
 
+export const getInvitations = async (token) => {
+  const res = await fetch(`${BASE_URL}/invitations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
+};
+
+export const respondInvitation = async (token, id, accept) => {
+  const res = await fetch(`${BASE_URL}/invitations/${id}/respond`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}` 
+    },
+    body: JSON.stringify({ accept }),
+  });
+  return res.json();
+};
+
 export const getUserProjects = (token) =>
-  fetchData('/projects/my', {
+  fetchData('/projects', {
     method: 'GET',
     token,
   });
@@ -54,10 +89,9 @@ export const deleteProject = (token, projectId) =>
     token,
   });
 
-// Panel
+
 export const getPanel = () => fetchData('/panel');
 
-// Columns API
 export const createColumn = (token, title, projectId) =>
   fetchData('/columns', {
     method: 'POST',
@@ -86,11 +120,12 @@ export const getColumnsByProject = (token, projectId) =>
 
 // Tasks API
 export const createTask = (token, title, description, columnId) =>
-  fetchData('/tasks', {
+  fetchData(`/columns/${columnId}/tasks`, { 
     method: 'POST',
     token,
-    body: JSON.stringify({ title, description, columnId }),
+    body: JSON.stringify({ title, description }),
   });
+
 
 export const updateTask = (token, taskId, title, description) =>
   fetchData(`/tasks/${taskId}`, {
@@ -106,10 +141,17 @@ export const moveTask = (token, taskId, targetColumnId, newOrder) =>
     body: JSON.stringify({ targetColumnId, newOrder }),
   });
 
-export const deleteTask = (token, taskId) =>
-  fetchData(`/tasks/${taskId}`, {
+export const deleteTask = (token, columnId, taskId) =>
+  fetchData(`/columns/${columnId}/tasks/${taskId}`, {
     method: 'DELETE',
     token,
+  });
+
+export const inviteUserToProject = (token, email, projectId) =>
+  fetchData('/invitations/invite', {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ email, projectId }),
   });
 
 export const getTasksByColumn = (token, columnId) =>
@@ -134,6 +176,18 @@ export const deleteComment = (token, commentId) =>
 
 export const getCommentsByTask = (token, taskId) =>
   fetchData(`/comments/task/${taskId}`, {
+    method: 'GET',
+    token,
+  });
+export const addUserToProject = (token, projectId, email) =>
+  fetchData(`/projects/${projectId}/users`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ email }),
+  });
+
+export const getProjectUsers = (token, projectId) =>
+  fetchData(`/projects/${projectId}/users`, {
     method: 'GET',
     token,
   });

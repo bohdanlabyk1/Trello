@@ -1,56 +1,40 @@
-import { Controller, Post, Body, Delete, Param, Req, Get, HttpException, HttpStatus } from '@nestjs/common';
+// project.controller.ts
+import { Controller, Get, Post, Body, Param, Req, UseGuards } from '@nestjs/common';
 import { ProjectService } from './progect.service';
-import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from './../auth-user/jwt-auth';
 
 @Controller('projects')
+@UseGuards(JwtAuthGuard)
 export class ProjectController {
-  constructor(
-    private readonly projectService: ProjectService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly projectService: ProjectService) {}
 
-  @Post('create')
-  async createProject(
-    @Body() body: { name: string; description?: string },
-    @Req() req,
-  ) {
-    try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader) throw new HttpException('JWT не надано', HttpStatus.UNAUTHORIZED);
-      const token = authHeader.split(' ')[1];
-      const payload = this.jwtService.verify(token);
-
-      return this.projectService.createProject(payload.id, body.name, body.description);
-    } catch (error) {
-      throw new HttpException(error.message || 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+  @Get()
+  findAll(@Req() req) {
+    return this.projectService.findByUser(req.user.id);
   }
 
-  @Get('my')
-  async getProjects(@Req() req) {
-    try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader) throw new HttpException('JWT не надано', HttpStatus.UNAUTHORIZED);
-      const token = authHeader.split(' ')[1];
-      const payload = this.jwtService.verify(token);
+  @Post()
+create(@Body('name') name: string, @Body('description') description: string, @Req() req) {
+  return this.projectService.create({ name, description }, req.user.id);
+}
 
-      return this.projectService.getUserProjects(payload.id);
-    } catch (error) {
-      throw new HttpException(error.message || 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
+@Post(':id/users')
+addUser(
+  @Param('id') id: number,
+  @Body('email') email: string,
+  @Req() req
+) {
+  return this.projectService.addUserToProject(id, email, req.user.id);
+}
 
-  @Delete(':id')
-  async deleteProject(@Param('id') id: number, @Req() req) {
-    try {
-      const authHeader = req.headers['authorization'];
-      if (!authHeader) throw new HttpException('JWT не надано', HttpStatus.UNAUTHORIZED);
-      const token = authHeader.split(' ')[1];
-      const payload = this.jwtService.verify(token);
+@Get(':id/users')
+getUsers(@Param('id') id: number) {
+  return this.projectService.getProjectUsers(id);
+}
 
-      return this.projectService.deleteProject(payload.id, id);
-    } catch (error) {
-      throw new HttpException(error.message || 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+
+  @Get(':id')
+  findOne(@Param('id') id: number, @Req() req) {
+    return this.projectService.findOneByUser(id, req.user.id);
   }
 }

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import Column from './Column';
 import './Board.css';
-import { useBoardStore } from './apiboardc';
+import { useProjectStore } from './apiboardc';
 import * as api from './../api/api';
 
 const Board = ({ token, projectId }) => {
-  const { columns, tasks, loadColumns, moveTaskLocally, addColumn } = useBoardStore();
+  const { columns, tasks, loadColumns, moveTaskLocally, addColumn } = useProjectStore();
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {

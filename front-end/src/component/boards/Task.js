@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import CommentList from './coments';
 import './Board.css';
-import { useBoardStore } from './apiboardc';
+import { useProjectStore } from './apiboardc';
 
 const Task = ({ task, token, columnId }) => {
-  const { updateTask, deleteTaskById, loadComments, comments } = useBoardStore();
+  const { updateTask, deleteTaskById, loadComments, comments } = useProjectStore();
   const [showComments, setShowComments] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
@@ -17,7 +17,15 @@ const Task = ({ task, token, columnId }) => {
 
 
   const handleUpdateTask = () => updateTask(token, task.id, title, description, columnId);
-  const handleDeleteTask = () => deleteTaskById(token, task.id, columnId);
+  const handleDeleteTask = () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Token not found. Please log in again.');
+    return;
+  }
+  deleteTaskById(token, task.id, columnId);
+};
+
 
   return (
     <div style={{ background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '8px' }}>

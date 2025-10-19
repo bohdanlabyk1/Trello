@@ -7,6 +7,52 @@
   height: 60px;
   box-sizing: border-box;
 }
+.notification-container {
+  position: relative;
+  display: inline-block;
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  width: 300px;
+  z-index: 1000;
+}
+
+.notifications-dropdown h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.invite-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.invite-card button {
+  margin-right: 6px;
+  border: none;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.invite-card button:first-child {
+  background: #4caf50;
+  color: white;
+}
+
+.invite-card button:last-child {
+  background: #f44336;
+  color: white;
+}
 
 /* Ліва частина */
 .header__left {
@@ -18,6 +64,10 @@
   font-size: 28px;
   color: #026aa7;
   margin-right: 8px;
+}
+
+.create-btn{
+ padding: 10px;
 }
 
 .header__logo-text {

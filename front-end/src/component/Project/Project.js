@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './project.css';
 import { useNavigate } from 'react-router-dom';
 import { getUserProjects, createProject, deleteProject } from '../api/api';
+import { useProjectStore } from '../boards/apiboardc';
 
 const Project = ({ ismodal, setIsmodal }) => {
   const [project, setProject] = useState([]);
@@ -10,11 +11,10 @@ const Project = ({ ismodal, setIsmodal }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    if (!token) return;
     getUserProjects(token).then((data) => {
       setProject(data);
-      if (data.length === 0) {
-        setIsmodal(true);
-      }
+      if (data.length === 0) setIsmodal(true);
     });
   }, [setIsmodal]);
 
@@ -24,9 +24,25 @@ const Project = ({ ismodal, setIsmodal }) => {
 
   const handleCreateProject = async () => {
     const token = localStorage.getItem('token');
-    const newProj = await createProject(token, newProject.name, newProject.description);
-    setProject([...project, newProj]);
-    setIsmodal(false);
+    if (!newProject.name) return alert('Введіть назву проекту');
+    try {
+      const newProj = await createProject(token, newProject.name, newProject.description);
+
+      // Додаємо користувача як учасника автоматично
+      setProject([...project, newProj]);
+      setIsmodal(false);
+
+      // Очистка Board Store
+      const boardStore = useProjectStore.getState();
+      boardStore.set({ columns: [], tasks: {}, comments: {} });
+      await boardStore.loadColumns(token, newProj.id);
+
+      // Перехід на Dashboard нового проекту
+      navigate(`/project/${newProj.id}`);
+    } catch (err) {
+      console.error('Помилка при створенні проекту:', err);
+      alert('Не вдалося створити проект');
+    }
   };
 
   const handleDeleteProject = async (id) => {
@@ -42,7 +58,6 @@ const Project = ({ ismodal, setIsmodal }) => {
   return (
     <div className="projects">
       <h2>Мої проекти</h2>
-
       <div className="projects-list">
         {project.map((p) => (
           <div key={p.id} className="project-card">

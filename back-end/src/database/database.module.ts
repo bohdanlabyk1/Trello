@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Auth } from 'src/auth-user/auth-user.entiti';
-import { Panel } from 'src/panel/panel.entity';
 import { Project } from 'src/progect/project.entiti';
-import { Item } from '../panel/item.entity';
 import { ColumnEntity } from 'src/column/column.entity';
 import { Comment } from 'src/coments/coment.entity';
 import { Task } from 'src/task/task.entity';
+import { Invitation } from 'src/invitation/invitation.entiti';
+import { Sprint } from 'src/sprint/sprint.entity';
 
 @Module({
   imports: [
@@ -19,9 +19,9 @@ import { Task } from 'src/task/task.entity';
       database: 'trello',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [Auth, Project, Panel, Item, ColumnEntity, Comment, Task], 
+      entities: [Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint], 
     }),
-    TypeOrmModule.forFeature([Auth, Project, Panel, Item, ColumnEntity, Comment, Task]),
+    TypeOrmModule.forFeature([Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint]),
   ],
 })
 export class DatabaseModule {}

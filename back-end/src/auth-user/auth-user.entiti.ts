@@ -1,11 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { Project } from "src/progect/project.entiti";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
+import { Project } from "./../progect/project.entiti";
+import { Invitation } from "src/invitation/invitation.entiti";
 
 @Entity('auths')
 export class Auth {
-    @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn()
   id: number;
- @Column()
+
+  @Column()
   username: string;
 
   @Column({ unique: true })
@@ -14,7 +16,17 @@ export class Auth {
   @Column()
   password: string;
 
-@OneToMany(() => Project, (project) => project.user)
-projects: Project[];
+  // 🔹 Проекти, створені користувачем (він власник)
+  @OneToMany(() => Project, (project) => project.owner)
+  ownedProjects: Project[];
 
+  // 🔹 Проекти, в яких користувач є учасником
+  @ManyToMany(() => Project, (project) => project.members)
+  projects: Project[];
+
+  @OneToMany(() => Invitation, (inv) => inv.sender)
+sentInvitations: Invitation[];
+
+@OneToMany(() => Invitation, (inv) => inv.recipient)
+receivedInvitations: Invitation[];
 }

@@ -1,25 +1,25 @@
-import { Controller, Post, Patch, Param, Delete, Body } from '@nestjs/common';
-import { ColumnsService } from './column.service';
+// column.controller.ts
+import { Controller, Get, Post, Param, Body, Delete, Req, UseGuards } from '@nestjs/common';
+import { ColumnService } from './column.service';
+import { JwtAuthGuard } from './../auth-user/jwt-auth';
 
-@Controller('columns')
-export class ColumnsController {
-  constructor(private readonly columnsService: ColumnsService) {}
+@Controller('projects/:projectId/columns')
+@UseGuards(JwtAuthGuard)
+export class ColumnController {
+  constructor(private readonly columnService: ColumnService) {}
 
-  @Post()
-  create(@Body() body: { title: string; projectId: number }) {
-    return this.columnsService.create(body);
+  @Get()
+  findAll(@Param('projectId') projectId: number, @Req() req) {
+    return this.columnService.findByProject(projectId, req.user.id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: number,
-    @Body() body: { title?: string }
-  ) {
-    return this.columnsService.update(id, body);
+  @Post()
+  create(@Param('projectId') projectId: number, @Body('title') title: string, @Req() req) {
+    return this.columnService.create(title, projectId, req.user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.columnsService.remove(id);
+  remove(@Param('id') id: number, @Req() req) {
+    return this.columnService.delete(id, req.user.id);
   }
 }

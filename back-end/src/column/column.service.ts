@@ -1,12 +1,11 @@
-// column.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ColumnEntity } from './column.entity';
 import { Project } from './../progect/project.entiti';
 
 @Injectable()
-export class ColumnsService {
+export class ColumnService {
   constructor(
     @InjectRepository(ColumnEntity)
     private readonly columnRepo: Repository<ColumnEntity>,
@@ -14,36 +13,58 @@ export class ColumnsService {
     private readonly projectRepo: Repository<Project>,
   ) {}
 
-  async create(dto: { title: string; projectId: number }) {
-    const project = await this.projectRepo.findOne({ where: { id: dto.projectId } });
+  async findByProject(projectId: number, userId: number) {
+    const project = await this.projectRepo.findOne({
+      where: { id: projectId },
+      relations: ['owner', 'members'],
+    });
+
     if (!project) throw new NotFoundException('Project not found');
 
-    const column = this.columnRepo.create({
-      title: dto.title,
-      project,
-    });
-    return this.columnRepo.save(column);
-  }
+    const hasAccess =
+      project.owner.id === userId ||
+      project.members.some((m) => m.id === userId);
 
-  async update(id: number, dto: { title?: string }) {
-    const column = await this.columnRepo.findOne({ where: { id } });
-    if (!column) throw new NotFoundException('Column not found');
+    if (!hasAccess) throw new ForbiddenException('Access denied');
 
-    Object.assign(column, dto);
-    return this.columnRepo.save(column);
-  }
-
-  async remove(id: number) {
-    const column = await this.columnRepo.findOne({ where: { id } });
-    if (!column) throw new NotFoundException('Column not found');
-    return this.columnRepo.remove(column);
-  }
-
-  async findByProject(projectId: number) {
     return this.columnRepo.find({
       where: { project: { id: projectId } },
       relations: ['tasks'],
-      order: { order: 'ASC' },
     });
+  }
+
+  async create(title: string, projectId: number, userId: number) {
+    const project = await this.projectRepo.findOne({
+      where: { id: projectId },
+      relations: ['owner', 'members'],
+    });
+
+    if (!project) throw new NotFoundException('Project not found');
+
+    const hasAccess =
+      project.owner.id === userId ||
+      project.members.some((m) => m.id === userId);
+
+    if (!hasAccess) throw new ForbiddenException('Access denied');
+
+    const column = this.columnRepo.create({ title, project });
+    return this.columnRepo.save(column);
+  }
+
+  async delete(columnId: number, userId: number) {
+    const column = await this.columnRepo.findOne({
+      where: { id: columnId },
+      relations: ['project', 'project.owner', 'project.members'],
+    });
+
+    if (!column) throw new NotFoundException('Column not found');
+
+    const hasAccess =
+      column.project.owner.id === userId ||
+      column.project.members.some((m) => m.id === userId);
+
+    if (!hasAccess) throw new ForbiddenException('Access denied');
+
+    return this.columnRepo.remove(column);
   }
 }
