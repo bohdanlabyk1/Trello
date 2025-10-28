@@ -26,7 +26,23 @@ export class ProjectService {
 
   return this.projectRepo.save(project);
 }
+ async deleteProject(projectId: number, userId: number) {
+    const project = await this.projectRepo.findOne({
+      where: { id: projectId },
+      relations: ['owner'],
+    });
 
+    if (!project) throw new NotFoundException('Project not found');
+
+    // лише власник може видаляти
+    if (project.owner.id !== userId) {
+      throw new ForbiddenException('Only owner can delete the project');
+    }
+
+    await this.projectRepo.remove(project);
+
+    return { message: 'Project deleted successfully' };
+  }
 async addUserToProject(projectId: number, userEmail: string, ownerId: number) {
   const project = await this.projectRepo.findOne({
     where: { id: projectId },

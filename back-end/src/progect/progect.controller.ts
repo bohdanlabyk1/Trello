@@ -1,5 +1,5 @@
 // project.controller.ts
-import { Controller, Get, Post, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
 import { ProjectService } from './progect.service';
 import { JwtAuthGuard } from './../auth-user/jwt-auth';
 
@@ -36,5 +36,9 @@ getUsers(@Param('id') id: number) {
   @Get(':id')
   findOne(@Param('id') id: number, @Req() req) {
     return this.projectService.findOneByUser(id, req.user.id);
+  }
+   @Delete(':id')
+  deleteProject(@Param('id') id: number, @Req() req) {
+    return this.projectService.deleteProject(id, req.user.id);
   }
 }

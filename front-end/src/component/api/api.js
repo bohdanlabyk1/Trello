@@ -2,13 +2,17 @@ const BASE_URL = 'http://localhost:3002';
 
 const fetchData = async (endpoint, options = {}) => {
   try {
-    const token = options.token;
+    const token = options.token || localStorage.getItem('token');
+    if (!token && endpoint !== '/auth-user/login' && endpoint !== '/auth-user/register') {
+      throw new Error('No token found. Please login.');
+    }
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers, // якщо додаткові заголовки
+        ...options.headers,
       },
     });
 
@@ -23,6 +27,7 @@ const fetchData = async (endpoint, options = {}) => {
     throw error;
   }
 };
+
 
 export const createSprint = (token, { name, startDate, endDate, projectId,}) =>
   fetchData('/sprints', {
@@ -93,10 +98,10 @@ export const deleteProject = (token, projectId) =>
 export const getPanel = () => fetchData('/panel');
 
 export const createColumn = (token, title, projectId) =>
-  fetchData('/columns', {
+  fetchData(`/projects/${projectId}/columns`, {
     method: 'POST',
     token,
-    body: JSON.stringify({ title, projectId }),
+    body: JSON.stringify({ title }),
   });
 
 export const updateColumn = (token, columnId, title) =>
@@ -106,14 +111,15 @@ export const updateColumn = (token, columnId, title) =>
     body: JSON.stringify({ title }),
   });
 
-export const deleteColumn = (token, columnId) =>
-  fetchData(`/columns/${columnId}`, {
+export const deleteColumn = (token, projectId, columnId) =>
+  fetchData(`/projects/${projectId}/columns/${columnId}`, {
     method: 'DELETE',
     token,
   });
 
+
 export const getColumnsByProject = (token, projectId) =>
-  fetchData(`/columns/project/${projectId}`, {
+  fetchData(`/projects/${projectId}/columns`, {
     method: 'GET',
     token,
   });

@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import Column from './Column';
-import './Board.css';
 import { useProjectStore } from './apiboardc';
 import * as api from './../api/api';
 
-const Board = ({ token, projectId }) => {
-  const { columns, tasks, loadColumns, moveTaskLocally, addColumn } = useProjectStore();
+const Board = ({ projectId }) => {
+  const { token, columns, tasks, loadColumns, moveTaskLocally, addColumn } = useProjectStore();
   const [newColumnTitle, setNewColumnTitle] = useState('');
 
   useEffect(() => {
-    if (token && projectId) {
-      loadColumns(token, projectId);
-    }
-  }, [token, projectId, loadColumns]);
+    if (token && projectId) loadColumns();
+  }, [token, projectId]);
 
   const onDragEnd = async (result) => {
     const { source, destination, draggableId } = result;
@@ -23,12 +20,16 @@ const Board = ({ token, projectId }) => {
     const task = tasks[source.droppableId].find(t => String(t.id) === String(draggableId));
     moveTaskLocally(source.droppableId, destination.droppableId, task, destination.index);
 
-    await api.moveTask(token, draggableId, destination.droppableId, destination.index);
+    try {
+      await api.moveTask(token, draggableId, destination.droppableId, destination.index);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleAddColumn = async () => {
-    if (!newColumnTitle) return;
-    await addColumn(token, newColumnTitle, projectId);
+    if (!newColumnTitle.trim()) return;
+    await addColumn(newColumnTitle);
     setNewColumnTitle('');
   };
 
@@ -50,7 +51,6 @@ const Board = ({ token, projectId }) => {
               key={col.id}
               column={col}
               tasks={tasks[col.id] || []}
-              token={token}
             />
           ))}
         </div>

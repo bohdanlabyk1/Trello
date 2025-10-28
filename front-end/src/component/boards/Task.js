@@ -3,29 +3,18 @@ import CommentList from './coments';
 import './Board.css';
 import { useProjectStore } from './apiboardc';
 
-const Task = ({ task, token, columnId }) => {
-  const { updateTask, deleteTaskById, loadComments, comments } = useProjectStore();
+const Task = ({ task, columnId }) => {
+  const { updateTask, deleteTask, loadComments, comments } = useProjectStore();
   const [showComments, setShowComments] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
 
- useEffect(() => {
-  if (showComments) {
-    loadComments(token, task.id);
-  }
-}, [showComments, token, task.id, loadComments]);
+  useEffect(() => {
+    if (showComments) loadComments(task.id);
+  }, [showComments, task.id, loadComments]);
 
-
-  const handleUpdateTask = () => updateTask(token, task.id, title, description, columnId);
-  const handleDeleteTask = () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    alert('Token not found. Please log in again.');
-    return;
-  }
-  deleteTaskById(token, task.id, columnId);
-};
-
+  const handleUpdateTask = () => updateTask(task.id, columnId, title, description);
+  const handleDeleteTask = () => deleteTask(task.id, columnId);
 
   return (
     <div style={{ background: 'white', padding: '8px', borderRadius: '8px', marginBottom: '8px' }}>
@@ -45,7 +34,7 @@ const Task = ({ task, token, columnId }) => {
       <button onClick={() => setShowComments(prev => !prev)}>
         {showComments ? 'Hide Comments' : 'Show Comments'}
       </button>
-      {showComments && <CommentList taskId={task.id} comments={comments[task.id] || []} token={token} />}
+      {showComments && <CommentList taskId={task.id} comments={comments[task.id] || []} />}
     </div>
   );
 };

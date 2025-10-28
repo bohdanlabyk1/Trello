@@ -15,92 +15,135 @@ export const useProjectStore = create(
       error: null,
 
       // 🔹 Token
-      setToken: (token) => set({ token }),
+      setToken: (token) => {
+        localStorage.setItem('token', token);
+        set({ token });
+      },
 
       // 🔹 Проект
       setProject: (project) => set({ project }),
 
-      // 🔹 Завантажити колонки і задачі
+      // 🔹 Колонки та задачі
       loadColumns: async () => {
         const { token, project } = get();
         if (!token || !project) return;
         set({ loading: true });
+
         try {
           const columns = await api.getColumnsByProject(token, project.id);
+
+          const tasksArrays = await Promise.all(
+            columns.map(col => api.getTasksByColumn(token, col.id))
+          );
+
           const tasks = {};
-          for (const col of columns) {
-            tasks[col.id] = await api.getTasksByColumn(token, col.id);
-          }
+          columns.forEach((col, idx) => {
+            tasks[col.id] = tasksArrays[idx];
+          });
+
           set({ columns, tasks, loading: false });
         } catch (err) {
           set({ error: err.message, loading: false });
         }
       },
 
-      // 🔹 Колонки
       addColumn: async (title) => {
         const { token, project, columns, tasks } = get();
         if (!token || !project) return;
-        const newCol = await api.createColumn(token, title, project.id);
-        set({ 
-          columns: [...columns, newCol], 
-          tasks: { ...tasks, [newCol.id]: [] } 
-        });
+
+        try {
+          const newCol = await api.createColumn(token, title, project.id);
+          set({ 
+            columns: [...columns, newCol], 
+            tasks: { ...tasks, [newCol.id]: [] } 
+          });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
       updateColumnTitle: async (columnId, title) => {
         const { token, columns } = get();
-        await api.updateColumn(token, columnId, title);
-        set({
-          columns: columns.map(c => c.id === columnId ? { ...c, title } : c)
-        });
+        if (!token) return;
+
+        try {
+          await api.updateColumn(token, columnId, title);
+          set({
+            columns: columns.map(c => c.id === columnId ? { ...c, title } : c)
+          });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
       deleteColumn: async (columnId) => {
-        const { token, columns, tasks } = get();
-        await api.deleteColumn(token, columnId);
-        const newTasks = { ...tasks };
-        delete newTasks[columnId];
-        set({
-          columns: columns.filter(c => c.id !== columnId),
-          tasks: newTasks
-        });
+        const { token, columns, tasks, project } = get();
+        if (!token || !project) return;
+
+        try {
+          await api.deleteColumn(token, project.id, columnId);
+          const newTasks = { ...tasks };
+          delete newTasks[columnId];
+          set({
+            columns: columns.filter(c => c.id !== columnId),
+            tasks: newTasks
+          });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
-      // 🔹 Задачі
       addTask: async (columnId, title, description='') => {
         const { token, tasks } = get();
-        const newTask = await api.createTask(token, title, description, columnId);
-        set({
-          tasks: {
-            ...tasks,
-            [columnId]: [...(tasks[columnId] || []), newTask],
-          }
-        });
+        if (!token) return;
+
+        try {
+          const newTask = await api.createTask(token, title, description, columnId);
+          set({
+            tasks: {
+              ...tasks,
+              [columnId]: [...(tasks[columnId] || []), newTask],
+            }
+          });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
       updateTask: async (taskId, columnId, title, description) => {
         const { token, tasks } = get();
-        await api.updateTask(token, taskId, title, description);
-        set({
-          tasks: {
-            ...tasks,
-            [columnId]: tasks[columnId].map(t =>
-              t.id === taskId ? { ...t, title, description } : t
-            )
-          }
-        });
+        if (!token) return;
+
+        try {
+          await api.updateTask(token, taskId, title, description);
+          set({
+            tasks: {
+              ...tasks,
+              [columnId]: tasks[columnId].map(t =>
+                t.id === taskId ? { ...t, title, description } : t
+              )
+            }
+          });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
       deleteTask: async (taskId, columnId) => {
         const { token, tasks } = get();
-        await api.deleteTask(token, columnId, taskId);
-        set({
-          tasks: {
-            ...tasks,
-            [columnId]: tasks[columnId].filter(t => t.id !== taskId)
-          }
-        });
+        if (!token) return;
+
+        try {
+          await api.deleteTask(token, columnId, taskId);
+          set({
+            tasks: {
+              ...tasks,
+              [columnId]: tasks[columnId].filter(t => t.id !== taskId)
+            }
+          });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
       moveTaskLocally: (sourceColId, destColId, task, newIndex) => {
@@ -120,31 +163,29 @@ export const useProjectStore = create(
         });
       },
 
-      // 🔹 Коментарі
-      loadComments: async (taskId) => {
-        const { token, comments } = get();
-        const data = await api.getCommentsByTask(token, taskId);
-        set({ comments: { ...comments, [taskId]: data } });
-      },
-
-      createComment: async (taskId, text) => {
-        const { token } = get();
-        await api.createComment(token, text, taskId);
-        get().loadComments(taskId);
-      },
-
       // 🔹 Спринти
       loadSprints: async () => {
         const { token, project } = get();
         if (!token || !project) return;
-        const data = await api.getSprintsByProject(token, project.id);
-        set({ sprints: data });
+
+        try {
+          const data = await api.getSprintsByProject(token, project.id);
+          set({ sprints: data });
+        } catch (err) {
+          set({ error: err.message });
+        }
       },
 
       createSprint: async ({ name, startDate, endDate }) => {
         const { token, project, sprints } = get();
-        const newSprint = await api.createSprint(token, name, startDate, endDate, project.id);
-        set({ sprints: [...sprints, newSprint] });
+        if (!token || !project) return;
+
+        try {
+          const newSprint = await api.createSprint(token, { name, startDate, endDate, projectId: project.id });
+          set({ sprints: [...sprints, newSprint] });
+        } catch (err) {
+          set({ error: err.message });
+        }
       }
 
     }),
