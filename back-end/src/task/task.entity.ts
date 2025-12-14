@@ -17,6 +17,9 @@ export class Task {
 
   @Column({ default: 0 })
   order: number;
+  @Column({ default: 'todo' }) 
+status: string;
+
 
   @ManyToOne(() => ColumnEntity, (column) => column.tasks, { onDelete: 'CASCADE' })
   column: ColumnEntity;
@@ -25,6 +28,6 @@ export class Task {
   comments: Comment[];
 
   @ManyToOne(() => Sprint, (sprint) => sprint.tasks, { nullable: true, onDelete: 'SET NULL' })
-sprint: Sprint;
+sprint: Sprint | null;
 
 }

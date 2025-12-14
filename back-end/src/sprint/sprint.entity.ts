@@ -17,6 +17,13 @@ export class Sprint {
   @Column({ type: 'date' })
   endDate: string;
 
+  @Column({ default: false })
+isActive: boolean;
+
+@Column({ default: false })
+isClosed: boolean;
+
+
   @ManyToOne(() => Project, (project) => project.sprints, { onDelete: 'CASCADE' })
   project: Project;
 

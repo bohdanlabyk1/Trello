@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import './Authform.css';
+import './../style/style.css';
 import { loginUser, registerUser } from '../api/api';
 import { useNavigate } from 'react-router-dom';
+import { useProjectStore } from './../boards/apiboardc';
 
 export const Authform = () => {
   const navigate = useNavigate();
+  const { setToken } = useProjectStore.getState(); // ⚡ отримуємо setToken зі store
 
   const [isLogin, setIsLogin] = useState(true);
   const [animating, setAnimating] = useState(false);
@@ -29,7 +31,6 @@ export const Authform = () => {
     }
 
     try {
-      // 🔁 Тут логіка була переплутана — виправлено
       const result = isLogin
         ? await loginUser(formData.email, formData.password)
         : await registerUser(
@@ -39,10 +40,12 @@ export const Authform = () => {
             formData.repit_password
           );
 
-      if (result.status === 'success' && result.token) {
-        localStorage.setItem('token', result.token);
-        navigate('/dashboard');
-      }
+      // ⚡ Перевірка токена
+      const token = result.token || result.data?.token;
+      if (!token) throw new Error('Токен не отримано від сервера');
+
+      setToken(token); // ⚡ зберігаємо токен у Zustand
+      navigate('/dashboard');
 
       setFormData({
         username: '',
@@ -52,14 +55,14 @@ export const Authform = () => {
       });
       setMessage('');
     } catch (error) {
-      setMessage('Помилка запиту: ' + error.message);
+      setMessage('Помилка: ' + error.message);
     }
   };
 
   const toggleForm = () => {
     setAnimating(true);
     setTimeout(() => {
-      setIsLogin((prev) => !prev);
+      setIsLogin(prev => !prev);
       setAnimating(false);
       setMessage('');
     }, 300);

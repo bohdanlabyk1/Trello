@@ -10,9 +10,12 @@ export class ColumnEntity {
 
   @Col()
   title: string;
+  @Col({ default: '#3b82f6' })
+  color: string;
+
 
   @Col({ default: 0 })
-  order: number; // порядок для drag & drop
+  order: number; 
 
   @ManyToOne(() => Project, (project) => project.columns, { onDelete: 'CASCADE' })
   project: Project;

@@ -21,4 +21,18 @@ create(@Body() body: { name: string; startDate: string; endDate: string; project
   delete(@Param('id') id: number) {
     return this.sprintService.delete(id);
   }
+  @Get('/:id/stats')
+getStats(@Param('id') id: number) {
+  return this.sprintService.getSprintStats(id);
+}
+
+@Post('/:id/activate')
+activate(@Param('id') id: number, @Body() body: { projectId: number }) {
+  return this.sprintService.setActiveSprint(id, body.projectId);
+}
+
+@Post('/:id/close')
+close(@Param('id') id: number) {
+  return this.sprintService.closeSprint(id);
+}
 }

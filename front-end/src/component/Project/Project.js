@@ -1,43 +1,45 @@
 import React, { useEffect, useState } from 'react';
-import './project.css';
+import './../style/style.css';
 import { useNavigate } from 'react-router-dom';
 import { getUserProjects, createProject, deleteProject } from '../api/api';
 import { useProjectStore } from '../boards/apiboardc';
 
 const Project = ({ ismodal, setIsmodal }) => {
-  const [project, setProject] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
   const navigate = useNavigate();
+  const { setProject, loadColumns } = useProjectStore.getState();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
+
     getUserProjects(token).then((data) => {
-      setProject(data);
+      setProjects(data);
       if (data.length === 0) setIsmodal(true);
     });
   }, [setIsmodal]);
 
-  const handleOpenProject = (id) => {
-    navigate(`/project/${id}`);
+  const handleOpenProject = (project) => {
+    setProject(project);       // ⚡ встановлюємо активний проект
+    loadColumns(project.id);   // ⚡ завантажуємо колонки для цього проекту
+    navigate(`/project/${project.id}`);
   };
 
   const handleCreateProject = async () => {
     const token = localStorage.getItem('token');
     if (!newProject.name) return alert('Введіть назву проекту');
+
     try {
       const newProj = await createProject(token, newProject.name, newProject.description);
 
-      // Додаємо користувача як учасника автоматично
-      setProject([...project, newProj]);
+      // ⚡ Додаємо новий проект у state та робимо його активним
+      setProjects([...projects, newProj]);
+      setProject(newProj);
       setIsmodal(false);
 
-      // Очистка Board Store
-      const boardStore = useProjectStore.getState();
-      boardStore.set({ columns: [], tasks: {}, comments: {} });
-      await boardStore.loadColumns(token, newProj.id);
+      await loadColumns(newProj.id); // завантажуємо колонки для нового проекту
 
-      // Перехід на Dashboard нового проекту
       navigate(`/project/${newProj.id}`);
     } catch (err) {
       console.error('Помилка при створенні проекту:', err);
@@ -49,7 +51,7 @@ const Project = ({ ismodal, setIsmodal }) => {
     try {
       const token = localStorage.getItem('token');
       await deleteProject(token, id);
-      setProject((prev) => prev.filter((p) => p.id !== id));
+      setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
       console.error('Помилка при видаленні проекту:', error);
     }
@@ -59,9 +61,9 @@ const Project = ({ ismodal, setIsmodal }) => {
     <div className="projects">
       <h2>Мої проекти</h2>
       <div className="projects-list">
-        {project.map((p) => (
+        {projects.map((p) => (
           <div key={p.id} className="project-card">
-            <h3 onClick={() => handleOpenProject(p.id)} style={{ cursor: 'pointer' }}>
+            <h3 onClick={() => handleOpenProject(p)} style={{ cursor: 'pointer' }}>
               {p.name}
             </h3>
             <p>{p.description}</p>
@@ -83,9 +85,7 @@ const Project = ({ ismodal, setIsmodal }) => {
             <textarea
               placeholder="Опис"
               value={newProject.description}
-              onChange={(e) =>
-                setNewProject({ ...newProject, description: e.target.value })
-              }
+              onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
             />
             <button onClick={handleCreateProject}>Створити</button>
             <button onClick={() => setIsmodal(false)}>Скасувати</button>

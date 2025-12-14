@@ -2,65 +2,65 @@ import React, { useState } from 'react';
 import { Droppable, Draggable } from 'react-beautiful-dnd';
 import Task from './Task';
 import { useProjectStore } from './apiboardc';
+import './../style/style.css';
 
-const Column = ({ column, tasks }) => {
-  const { updateColumnTitle, deleteColumn, addTask } = useProjectStore();
+const Column = ({ column, tasks, selectedSprintId }) => {
+  const { updateColumnTitle, deleteColumn, addTask, updateColumnColor } = useProjectStore();
   const [title, setTitle] = useState(column.title);
   const [menuOpen, setMenuOpen] = useState(false);
-
   const [addingTask, setAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
-  const handleUpdateColumn = () => {
-    if (title.trim()) updateColumnTitle(column.id, title);
-  };
+  const visibleTasks =
+    selectedSprintId === null
+      ? tasks
+      : tasks.filter(t => t.sprintId === selectedSprintId);
 
-  const handleDeleteColumn = () => {
-    deleteColumn(column.id);
-    setMenuOpen(false);
-  };
-
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
-    addTask(column.id, newTaskTitle);
+    await addTask(column.id, newTaskTitle);
     setNewTaskTitle('');
     setAddingTask(false);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleAddTask();
-    else if (e.key === 'Escape') {
-      setAddingTask(false);
-      setNewTaskTitle('');
-    }
-  };
-
   return (
-    <div className="column">
+    <div className="column" style={{ border: `4px solid ${column.color || '#3b82f6'}` }}>
       <div className="column-header">
         <input
           className="title-input"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          onBlur={handleUpdateColumn}
+          onBlur={() => updateColumnTitle(column.id, title)}
         />
-        <div className="menu-wrapper">
-          <button className="menu-button" onClick={() => setMenuOpen(prev => !prev)}>⋮</button>
-          {menuOpen && (
-            <div className="menu-dropdown">
-              <button onClick={handleDeleteColumn} className="menu-item">Delete Column</button>
-            </div>
-          )}
-        </div>
+        <input
+          type="color"
+          value={column.color || '#3b82f6'}
+          onChange={(e) => updateColumnColor(column.id, e.target.value)}
+        />
+        <button onClick={() => setMenuOpen(prev => !prev)}>⋮</button>
+        {menuOpen && (
+          <div className="menu-dropdown">
+            <button onClick={() => deleteColumn(column.id)}>Delete Column</button>
+          </div>
+        )}
       </div>
 
-      <Droppable droppableId={String(column.id)}>
+      <Droppable droppableId={String(column.id)} type="TASK">
         {(provided) => (
-          <div className="task-list" ref={provided.innerRef} {...provided.droppableProps}>
-            {tasks.map((task, index) => (
+          <div
+            className="task-list"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={{ minHeight: '50px' }}
+          >
+            {visibleTasks.map((task, index) => (
               <Draggable key={task.id} draggableId={String(task.id)} index={index}>
                 {(provided) => (
-                  <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
                     <Task task={task} columnId={column.id} />
                   </div>
                 )}
@@ -75,11 +75,10 @@ const Column = ({ column, tasks }) => {
         {addingTask ? (
           <input
             autoFocus
-            placeholder="Enter task title..."
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onBlur={() => { if (!newTaskTitle.trim()) setAddingTask(false); }}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
+            onBlur={() => setAddingTask(false)}
           />
         ) : (
           <button onClick={() => setAddingTask(true)}>＋ Add Task</button>

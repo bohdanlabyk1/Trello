@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './Header.css';
+import './../style/style.css';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { SiTrello } from 'react-icons/si';
 import { useNavigate } from 'react-router-dom';
 import InvitationsPanel from '../User/invitation';
+import { useProjectStore } from './../boards/apiboardc';
 
 const Header = ({ onCreateProject }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,6 +12,8 @@ const Header = ({ onCreateProject }) => {
   const menuRef = useRef(null);
   const bellRef = useRef(null);
   const navigate = useNavigate();
+   const toggleTheme = useProjectStore(state => state.toggleTheme);
+  const theme = useProjectStore(state => state.theme);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleNotifications = () => setIsNotificationsOpen(!isNotificationsOpen);
@@ -44,6 +47,9 @@ const Header = ({ onCreateProject }) => {
 
   return (
     <header className="header">
+       <button onClick={toggleTheme}>
+        {theme === "light" ? "🌙" : "☀️"}
+      </button>
       <div className="header__left" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
         <SiTrello className="header__logo" />
         <span className="header__logo-text">Trello</span>

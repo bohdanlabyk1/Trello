@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { getUserProjects } from '../api/api';
+import { getUserProjects } from './../api/api';
 import UsersPanel from './../User/userpanel';
 import Board from './../boards/board';
 import Sprint from './sprint';
-import './dashboard.css';
+import './../style/style.css';
 
 const Dashboard = () => {
   const { id } = useParams();

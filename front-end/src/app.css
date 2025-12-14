@@ -1,0 +1,22 @@
+:root {
+  --bg: #f4f6fa;
+  --text: #222;
+  --card: #ffffff;
+  --border: #ddd;
+}
+
+body[data-theme='dark'] {
+  --bg: #1e1f25;
+  --text: #e5e7eb;
+  --card: #2a2b32;
+  --border: #3f3f46;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+.column, .task {
+  background: var(--card);
+  border: 1px solid var(--border);
+}

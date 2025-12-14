@@ -2,6 +2,7 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ColumnEntity } from './../column/column.entity';
 import { Project } from './project.entiti';
 import { Auth } from './../auth-user/auth-user.entiti';
 
@@ -12,20 +13,43 @@ export class ProjectService {
     private readonly projectRepo: Repository<Project>,
     @InjectRepository(Auth)
     private readonly userRepo: Repository<Auth>,
+    @InjectRepository(ColumnEntity)
+private readonly columnRepo: Repository<ColumnEntity>,
+
   ) {}
 
- async create(data: { name: string; description: string }, userId: number) {
+async create(data: { name: string; description: string }, userId: number) {
   const user = await this.userRepo.findOneBy({ id: userId });
   if (!user) throw new NotFoundException('User not found');
 
+  // створюємо проект
   const project = this.projectRepo.create({
     name: data.name,
     description: data.description,
     owner: user,
   });
 
-  return this.projectRepo.save(project);
+  const savedProject = await this.projectRepo.save(project);
+
+  const defaultColumns = [
+    { title: 'To Do', order: 1 },
+    { title: 'In Progress', order: 2 },
+    { title: 'Done', order: 3 },
+  ];
+
+  for (const col of defaultColumns) {
+    await this.columnRepo.save(
+      this.columnRepo.create({
+        title: col.title,
+        order: col.order,
+        project: savedProject
+      })
+    );
+  }
+
+  return savedProject;
 }
+
  async deleteProject(projectId: number, userId: number) {
     const project = await this.projectRepo.findOne({
       where: { id: projectId },

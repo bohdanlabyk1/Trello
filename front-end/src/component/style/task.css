@@ -1,0 +1,102 @@
+/* ===== TASK CARD ===== */
+.task-card {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.task-card:hover {
+  background: #f4f5f7;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+/* ===== PRIORITY STRIPE ===== */
+.priority-low { border-left: 4px solid #61bd4f; }
+.priority-medium { border-left: 4px solid #f2d600; }
+.priority-high { border-left: 4px solid #eb5a46; }
+
+/* ===== LABEL DOT ===== */
+.task-label-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* кольори міток */
+.task-label-dot.green { background-color: #22c55e; }
+.task-label-dot.red { background-color: #ef4444; }
+.task-label-dot.yellow { background-color: #facc15; }
+
+/* ===== TOP ===== */
+.task-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+
+/* кружечок мітки зліва */
+.task-left .task-label-dot {
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+/* ===== MENU BUTTON ===== */
+.task-menu-button {
+  padding: 0 6px;
+  font-size: 18px;
+  color: #6b778c;
+  cursor: pointer;
+}
+
+.task-menu-button:hover { color: #172b4d; }
+
+/* ===== FOOTER ===== */
+.task-footer { margin-top: 6px; }
+
+.task-status { font-size: 12px; color: #6b778c; }
+.task-status.todo { color: #6b778c; }
+.task-status.in-progress { color: #0052cc; }
+.task-status.review { color: #ff991f; }
+.task-status.done { color: #36b37e; }
+
+/* ===== MENU ===== */
+.task-menu {
+  position: absolute;
+  top: 30px;
+  right: 6px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  min-width: 170px;
+  z-index: 20;
+}
+
+.task-menu-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.task-menu-item:hover { background: #f4f5f7; }
+.task-menu-item.delete { color: #c92a2a; }
+
+/* Мітки у меню */
+.task-menu .label-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+}

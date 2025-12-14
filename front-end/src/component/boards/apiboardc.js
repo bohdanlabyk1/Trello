@@ -1,194 +1,220 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import * as api from '../api/api';
+import * as api from './../api/api';
 
 export const useProjectStore = create(
   persist(
     (set, get) => ({
-      token: localStorage.getItem('token') || null,
-      project: null,
-      columns: [],
-      tasks: {},
-      comments: {},
-      sprints: [],
-      loading: false,
-      error: null,
+      // ===== UI =====
+      theme: localStorage.getItem('theme') || 'light',
 
-      // 🔹 Token
+      setTheme: (theme) => {
+        localStorage.setItem('theme', theme);
+        document.body.setAttribute('data-theme', theme);
+        set({ theme });
+      },
+     
+      toggleTheme: () => {
+        const next = get().theme === 'light' ? 'dark' : 'light';
+        localStorage.setItem('theme', next);
+        document.body.setAttribute('data-theme', next);
+        set({ theme: next });
+      },
+
+      // ===== AUTH =====
+      token: localStorage.getItem('token'),
+
       setToken: (token) => {
         localStorage.setItem('token', token);
         set({ token });
       },
 
-      // 🔹 Проект
-      setProject: (project) => set({ project }),
+      clearToken: () => {
+        localStorage.removeItem('token');
+        set({ token: null });
+      },
 
-      // 🔹 Колонки та задачі
-      loadColumns: async () => {
-        const { token, project } = get();
-        if (!token || !project) return;
+      // ===== DATA =====
+      project: null,
+      columns: [],
+      tasks: {},
+      sprints: [],
+      selectedSprintId: null,
+      loading: false,
+
+      setProject: (project) => set({ project }),
+      setSelectedSprintId: (id) => set({ selectedSprintId: id }),
+
+      // ===== LOAD =====
+      loadColumns: async (projectId) => {
+        const { token } = get();
+        if (!token || !projectId) return;
+
         set({ loading: true });
 
         try {
-          const columns = await api.getColumnsByProject(token, project.id);
-
-          const tasksArrays = await Promise.all(
-            columns.map(col => api.getTasksByColumn(token, col.id))
+          const columns = await api.getColumnsByProject(token, projectId);
+          const tasksArr = await Promise.all(
+            columns.map(c => api.getTasksByColumn(token, c.id))
           );
 
           const tasks = {};
-          columns.forEach((col, idx) => {
-            tasks[col.id] = tasksArrays[idx];
+          columns.forEach((c, i) => {
+            tasks[c.id] = tasksArr[i];
           });
 
           set({ columns, tasks, loading: false });
-        } catch (err) {
-          set({ error: err.message, loading: false });
+        } catch {
+          set({ loading: false });
         }
       },
 
+      loadSprints: async () => {
+        const { token, project } = get();
+        if (!token || !project) return;
+
+        try {
+          const sprints = await api.getSprintsByProject(token, project.id);
+          set({ sprints });
+        } catch {}
+      },
+
+      // ===== COLUMNS =====
       addColumn: async (title) => {
         const { token, project, columns, tasks } = get();
         if (!token || !project) return;
 
-        try {
-          const newCol = await api.createColumn(token, title, project.id);
-          set({ 
-            columns: [...columns, newCol], 
-            tasks: { ...tasks, [newCol.id]: [] } 
-          });
-        } catch (err) {
-          set({ error: err.message });
-        }
+        const newColumn = await api.createColumn(token, title, project.id);
+        set({
+          columns: [...columns, newColumn],
+          tasks: { ...tasks, [newColumn.id]: [] },
+        });
       },
 
-      updateColumnTitle: async (columnId, title) => {
-        const { token, columns } = get();
-        if (!token) return;
+      updateColumnTitle: (columnId, title) =>
+        set(state => ({
+          columns: state.columns.map(c =>
+            c.id === columnId ? { ...c, title } : c
+          ),
+        })),
 
-        try {
-          await api.updateColumn(token, columnId, title);
-          set({
-            columns: columns.map(c => c.id === columnId ? { ...c, title } : c)
-          });
-        } catch (err) {
-          set({ error: err.message });
-        }
-      },
+      updateColumnColor: (columnId, color) =>
+        set(state => ({
+          columns: state.columns.map(c =>
+            c.id === columnId ? { ...c, color } : c
+          ),
+        })),
 
       deleteColumn: async (columnId) => {
-        const { token, columns, tasks, project } = get();
+        const { token, project, columns, tasks } = get();
         if (!token || !project) return;
 
-        try {
-          await api.deleteColumn(token, project.id, columnId);
-          const newTasks = { ...tasks };
-          delete newTasks[columnId];
-          set({
-            columns: columns.filter(c => c.id !== columnId),
-            tasks: newTasks
-          });
-        } catch (err) {
-          set({ error: err.message });
-        }
+        await api.deleteColumn(token, project.id, columnId);
+
+        set({
+          columns: columns.filter(c => c.id !== columnId),
+          tasks: Object.fromEntries(
+            Object.entries(tasks).filter(([id]) => String(id) !== String(columnId))
+          ),
+        });
       },
 
-      addTask: async (columnId, title, description='') => {
+      // ===== TASKS =====
+      addTask: async (columnId, title) => {
+        const { token, tasks } = get();
+
+        const task = await api.createTask(
+          token,
+          title,
+          '',
+          columnId,
+          'low',
+          'todo',
+          null
+        );
+
+        set({
+          tasks: {
+            ...tasks,
+            [columnId]: [...(tasks[columnId] || []), task],
+          },
+        });
+      },
+
+      updateTask: async (
+        taskId,
+        columnId,
+        title,
+        description,
+        priority,
+        status,
+        sprintId,
+        label
+      ) => {
         const { token, tasks } = get();
         if (!token) return;
 
-        try {
-          const newTask = await api.createTask(token, title, description, columnId);
-          set({
-            tasks: {
-              ...tasks,
-              [columnId]: [...(tasks[columnId] || []), newTask],
-            }
-          });
-        } catch (err) {
-          set({ error: err.message });
-        }
-      },
+        const updated = await api.updateTask(
+          token,
+          taskId,
+          title,
+          description,
+          priority,
+          status,
+          sprintId,
+          label
+        );
 
-      updateTask: async (taskId, columnId, title, description) => {
-        const { token, tasks } = get();
-        if (!token) return;
-
-        try {
-          await api.updateTask(token, taskId, title, description);
-          set({
-            tasks: {
-              ...tasks,
-              [columnId]: tasks[columnId].map(t =>
-                t.id === taskId ? { ...t, title, description } : t
-              )
-            }
-          });
-        } catch (err) {
-          set({ error: err.message });
-        }
+        set({
+          tasks: {
+            ...tasks,
+            [columnId]: tasks[columnId].map(t =>
+              t.id === taskId ? updated : t
+            ),
+          },
+        });
       },
 
       deleteTask: async (taskId, columnId) => {
         const { token, tasks } = get();
         if (!token) return;
 
-        try {
-          await api.deleteTask(token, columnId, taskId);
-          set({
-            tasks: {
-              ...tasks,
-              [columnId]: tasks[columnId].filter(t => t.id !== taskId)
-            }
-          });
-        } catch (err) {
-          set({ error: err.message });
-        }
+        await api.deleteTask(token, columnId, taskId);
+
+        set({
+          tasks: {
+            ...tasks,
+            [columnId]: tasks[columnId].filter(t => t.id !== taskId),
+          },
+        });
       },
 
-      moveTaskLocally: (sourceColId, destColId, task, newIndex) => {
+      moveTaskLocally: (sourceColId, destColId, task, destIndex) =>
         set(state => {
           const sourceTasks = [...(state.tasks[sourceColId] || [])];
           const destTasks = [...(state.tasks[destColId] || [])];
+
           const index = sourceTasks.findIndex(t => t.id === task.id);
-          if (index !== -1) sourceTasks.splice(index, 1);
-          destTasks.splice(newIndex, 0, task);
+          if (index === -1) return {};
+
+          sourceTasks.splice(index, 1);
+          destTasks.splice(destIndex, 0, { ...task, columnId: destColId });
+
           return {
             tasks: {
               ...state.tasks,
               [sourceColId]: sourceTasks,
-              [destColId]: destTasks
-            }
+              [destColId]: destTasks,
+            },
           };
-        });
-      },
-
-      // 🔹 Спринти
-      loadSprints: async () => {
-        const { token, project } = get();
-        if (!token || !project) return;
-
-        try {
-          const data = await api.getSprintsByProject(token, project.id);
-          set({ sprints: data });
-        } catch (err) {
-          set({ error: err.message });
-        }
-      },
-
-      createSprint: async ({ name, startDate, endDate }) => {
-        const { token, project, sprints } = get();
-        if (!token || !project) return;
-
-        try {
-          const newSprint = await api.createSprint(token, { name, startDate, endDate, projectId: project.id });
-          set({ sprints: [...sprints, newSprint] });
-        } catch (err) {
-          set({ error: err.message });
-        }
-      }
-
+        }),
     }),
-    { name: 'project-store' }
+    {
+      name: 'project-store',
+      partialize: (state) => ({
+        theme: state.theme,
+        token: state.token,
+      }),
+    }
   )
 );
