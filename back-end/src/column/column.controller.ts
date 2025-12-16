@@ -1,5 +1,5 @@
 // column.controller.ts
-import { Controller, Get, Post, Param, Body, Delete, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Patch, Delete, Req, UseGuards } from '@nestjs/common';
 import { ColumnService } from './column.service';
 import { JwtAuthGuard } from './../auth-user/jwt-auth';
 
@@ -24,4 +24,13 @@ export class ColumnController {
   remove(@Param('projectId') projectId: number, @Param('id') id: number, @Req() req) {
     return this.columnService.delete(id, req.user.id);
   }
+  @Patch('columns/:id/color')
+updateColor(
+  @Param('id') id: number,
+  @Body('color') color: string,
+  @Req() req
+) {
+  return this.columnService.updateColor(id, color, req.user.id);
+}
+
 }

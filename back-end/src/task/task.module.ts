@@ -10,7 +10,9 @@ import { Sprint } from 'src/sprint/sprint.entity';
 @Module({
    imports: [TypeOrmModule.forFeature([Task, ColumnEntity, Sprint]),
   AuthUserModule],
-  controllers: [TaskController],
+  controllers:
+   [TaskController,
+  ],
   providers: [TaskService],
 })
 export class TaskModule {}

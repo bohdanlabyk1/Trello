@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from './task.entity';
 import { Sprint } from 'src/sprint/sprint.entity';
+import { UpdateTaskDto } from './task.dto';
 import { ColumnEntity } from 'src/column/column.entity';
 
 @Injectable()
@@ -33,25 +34,48 @@ export class TaskService {
     return this.taskRepo.find({
       where: { column: { id: columnId } },
       relations: ['comments'],
+      order: { order: 'ASC' }, 
     });
   }
- async update(id: number, updateTaskDto: Task, userId: number, columnId: number) {
+async update(
+  id: number,
+  dto: UpdateTaskDto,
+  userId: number,
+) {
   const task = await this.taskRepo.findOne({
     where: { id },
-    relations: ['column', 'column.project', 'column.project.owner', 'column.project.members'],
+    relations: [
+      'column',
+      'column.project',
+      'column.project.owner',
+      'column.project.members',
+    ],
   });
 
   if (!task) throw new NotFoundException('Task not found');
 
   const hasAccess =
     task.column.project.owner.id === userId ||
-    task.column.project.members.some((m) => m.id === userId);
+    task.column.project.members.some(m => m.id === userId);
 
   if (!hasAccess) throw new ForbiddenException('Access denied');
 
-  Object.assign(task, updateTaskDto);
+  if (dto.title !== undefined) task.title = dto.title;
+  if (dto.description !== undefined) task.description = dto.description;
+  if (dto.status !== undefined) task.status = dto.status;
+  if (dto.priority !== undefined) task.priority = dto.priority;
+  if (dto.label !== undefined) task.label = dto.label;
+
+  if (dto.sprintId !== undefined) {
+    task.sprint = dto.sprintId
+      ? await this.sprintRepo.findOne({ where: { id: dto.sprintId } })
+      : null;
+  }
+
   return this.taskRepo.save(task);
 }
+
+
 
   async create(title: string, description: string, columnId: number, userId: number) {
     const column = await this.columnRepo.findOne({
@@ -102,7 +126,7 @@ async moveTask(
   taskId: number,
   targetColumnId: number,
   newOrder: number,
-  userId: number
+  userId: number,
 ) {
   const task = await this.taskRepo.findOne({
     where: { id: taskId },
@@ -122,17 +146,37 @@ async moveTask(
 
   if (!hasAccess) throw new ForbiddenException('Access denied');
 
-  const targetColumn = await this.columnRepo.findOne({
-    where: { id: targetColumnId },
+  const sourceColumn = await this.columnRepo.findOne({
+    where: { id: task.column.id },
+    relations: ['tasks'],
   });
 
-  if (!targetColumn)
-    throw new NotFoundException('Target column not found');
+  const targetColumn = await this.columnRepo.findOne({
+    where: { id: targetColumnId },
+    relations: ['tasks'],
+  });
+
+  if (!sourceColumn || !targetColumn)
+    throw new NotFoundException('Column not found');
+
+  // 🧹 SOURCE: прибрати задачу і пересортувати
+  const sourceTasks = sourceColumn.tasks
+    .filter(t => t.id !== task.id)
+    .sort((a, b) => a.order - b.order);
+
+  sourceTasks.forEach((t, i) => (t.order = i));
+
+  // 🎯 TARGET: вставити задачу
+  const targetTasks = targetColumn.tasks
+    .filter(t => t.id !== task.id)
+    .sort((a, b) => a.order - b.order);
+
+  targetTasks.splice(newOrder, 0, task);
+  targetTasks.forEach((t, i) => (t.order = i));
 
   task.column = targetColumn;
-  task.order = newOrder;
 
-  return this.taskRepo.save(task);
+  await this.taskRepo.save([...sourceTasks, ...targetTasks]);
+  return task;
 }
-
 }

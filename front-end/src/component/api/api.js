@@ -84,11 +84,11 @@ export const createTask = (token, title, description, columnId,  priority, statu
   });
 
 
-export const updateTask = (token, taskId, title, description,  priority, status, sprintId) =>
-  fetchData(`/tasks/${taskId}`, {
+export const updateTask = (token, columnId, taskId, data) =>
+  fetchData(`/columns/${columnId}/tasks/${taskId}`, {
     method: 'PATCH',
     token,
-    body: JSON.stringify({ title, description,  priority, status, sprintId }),
+    body: JSON.stringify(data),
   });
 
 export const deleteTask = (token, columnId, taskId) =>
@@ -96,11 +96,13 @@ export const deleteTask = (token, columnId, taskId) =>
 
 
 export const moveTask = (token, taskId, targetColumnId, newOrder) =>
-  fetchData(`/tasks/${taskId}/move`, {
+  fetchData(`/columns/0/tasks/${taskId}/move`, {
     method: 'PATCH',
     token,
     body: JSON.stringify({ targetColumnId, newOrder }),
   });
+
+
 
 // 🔹 Sprints
 export const getSprintsByProject = (token, projectId) =>
@@ -173,6 +175,12 @@ export const closeSprint = (token, sprintId) =>
     method: 'POST',
     token,
     body: JSON.stringify({ sprintId }),
+  });
+export const updateColumnColor = (token, columnId, color) =>
+  fetchData(`/projects/columns/${columnId}/color`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify({ color }),
   });
 
 

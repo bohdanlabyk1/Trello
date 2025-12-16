@@ -11,5 +11,6 @@ import { AuthUserModule } from 'src/auth-user/auth-user.module';
   AuthUserModule],
   controllers: [ColumnController],
   providers: [ColumnService],
+    exports: [ColumnService]
 })
 export class ColumnModule {}

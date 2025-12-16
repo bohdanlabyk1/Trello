@@ -30,6 +30,7 @@ export class ColumnService {
     return this.columnRepo.find({
       where: { project: { id: projectId } },
       relations: ['tasks'],
+       order: { order: 'ASC' },
     });
   }
 
@@ -67,4 +68,21 @@ export class ColumnService {
 
     return this.columnRepo.remove(column);
   }
+  async updateColor(columnId: number, color: string, userId: number) {
+  const column = await this.columnRepo.findOne({
+    where: { id: columnId },
+    relations: ['project', 'project.owner', 'project.members'],
+  });
+
+  if (!column) throw new NotFoundException();
+
+  const hasAccess =
+    column.project.owner.id === userId ||
+    column.project.members.some(m => m.id === userId);
+
+  if (!hasAccess) throw new ForbiddenException();
+
+  column.color = color;
+  return this.columnRepo.save(column);
+}
 }

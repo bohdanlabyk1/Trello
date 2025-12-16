@@ -1,120 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import Column from './Column';
 import { useProjectStore } from './apiboardc';
-import * as api from './../api/api';
 
 const Board = ({ projectId }) => {
-  const store = useProjectStore();
-
   const {
     token,
     columns,
     tasks,
-    sprints,
-    selectedSprintId,
-    setSelectedSprintId,
     loadColumns,
-    loadSprints,
-    addColumn,
     moveTaskLocally,
-  } = store;
-
-  const [newColumnTitle, setNewColumnTitle] = useState('');
+    moveTask,
+  } = useProjectStore();
 
   useEffect(() => {
-    if (!token || !projectId) return;
-
-    loadColumns(projectId);
-    loadSprints();
-  }, [token, projectId]);
+    if (token && projectId) {
+      loadColumns(projectId);
+    }
+  }, [token, projectId, loadColumns]);
 
   const onDragEnd = async ({ source, destination, draggableId }) => {
     if (!destination) return;
 
-    const sourceColId = String(source.droppableId);
-    const destColId = String(destination.droppableId);
+    const fromColId = source.droppableId;
+    const toColId = destination.droppableId;
 
     if (
-      sourceColId === destColId &&
+      fromColId === toColId &&
       source.index === destination.index
     ) return;
 
-    const task = (tasks[sourceColId] || []).find(
+    const task = (tasks[fromColId] || []).find(
       t => String(t.id) === draggableId
     );
+
     if (!task) return;
 
-    moveTaskLocally(sourceColId, destColId, task, destination.index);
+    // 1️⃣ оптимістично оновлюємо UI
+    moveTaskLocally(fromColId, toColId, task, destination.index);
 
+    // 2️⃣ зберігаємо в БД
     try {
-      await api.moveTask(
-        token,
+      await moveTask(
         task.id,
-        Number(destColId),
+        Number(toColId),
         destination.index
       );
-    } catch {}
+    } catch (e) {
+      console.error('Move task failed', e);
+    }
   };
 
   return (
-    <div>
-      {/* TOP */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <label>Sprint:</label>
-
-      <select
-  value={selectedSprintId}
-  onChange={(e) => setSelectedSprintId(e.target.value)}
->
-  <option value="all">All tasks</option>
-  <option value="no-sprint">No Sprint</option>
-  {sprints.map(s => (
-    <option key={s.id} value={String(s.id)}>
-      {s.name}
-    </option>
-  ))}
-</select>
-
-
-        <input
-          placeholder="New column title"
-          value={newColumnTitle}
-          onChange={(e) => setNewColumnTitle(e.target.value)}
-        />
-        <button onClick={() => {
-          if (newColumnTitle.trim()) {
-            addColumn(newColumnTitle.trim());
-            setNewColumnTitle('');
-          }
-        }}>
-          Add Column
-        </button>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div style={{ display: 'flex', gap: 16 }}>
+        {columns.map(col => (
+          <Column
+            key={col.id}
+            column={col}
+            tasks={tasks[col.id] || []}
+          />
+        ))}
       </div>
-
-      {/* BOARD */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div style={{ display: 'flex', gap: 16 }}>
-          {columns.map(col => {
-            const columnTasks = tasks[String(col.id)] || [];
-
-            const filteredTasks = columnTasks.filter(task => {
-              if (!selectedSprintId) return true;
-              if (selectedSprintId === 'no-sprint') return !task.sprintId;
-              return task.sprintId === Number(selectedSprintId);
-            });
-
-            return (
-              <Column
-                key={col.id}
-                column={col}
-                tasks={filteredTasks}
-              />
-            );
-          })}
-        </div>
-      </DragDropContext>
-    </div>
+    </DragDropContext>
   );
 };
 

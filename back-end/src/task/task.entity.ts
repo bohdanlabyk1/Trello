@@ -17,12 +17,18 @@ export class Task {
 
   @Column({ default: 0 })
   order: number;
+  
   @Column({ default: 'todo' }) 
 status: string;
 
+@Column({ default: 'low' })
+priority: string;
 
-  @ManyToOne(() => ColumnEntity, (column) => column.tasks, { onDelete: 'CASCADE' })
-  column: ColumnEntity;
+@Column({ nullable: true })
+label: string;
+
+ @ManyToOne(() => ColumnEntity, column => column.tasks, { onDelete: 'CASCADE' })
+column: ColumnEntity;
 
   @OneToMany(() => Comment, (comment) => comment.task, { cascade: true })
   comments: Comment[];

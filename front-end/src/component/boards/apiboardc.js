@@ -5,133 +5,83 @@ import * as api from './../api/api';
 export const useProjectStore = create(
   persist(
     (set, get) => ({
-      // ===== UI =====
-      theme: localStorage.getItem('theme') || 'light',
-
-      setTheme: (theme) => {
-        localStorage.setItem('theme', theme);
-        document.body.setAttribute('data-theme', theme);
-        set({ theme });
-      },
-     
-      toggleTheme: () => {
-        const next = get().theme === 'light' ? 'dark' : 'light';
-        localStorage.setItem('theme', next);
-        document.body.setAttribute('data-theme', next);
-        set({ theme: next });
-      },
-
       // ===== AUTH =====
       token: localStorage.getItem('token'),
-
-      setToken: (token) => {
+      setToken: token => {
         localStorage.setItem('token', token);
         set({ token });
       },
 
-      clearToken: () => {
-        localStorage.removeItem('token');
-        set({ token: null });
-      },
-
       // ===== DATA =====
-      project: null,
       columns: [],
       tasks: {},
       sprints: [],
-      selectedSprintId: null,
+      selectedSprintId: 'all',
       loading: false,
 
-      setProject: (project) => set({ project }),
-      setSelectedSprintId: (id) => set({ selectedSprintId: id }),
+      setSelectedSprintId: id => set({ selectedSprintId: id }),
 
       // ===== LOAD =====
       loadColumns: async (projectId) => {
         const { token } = get();
-        if (!token || !projectId) return;
+        if (!token) return;
 
         set({ loading: true });
 
         try {
           const columns = await api.getColumnsByProject(token, projectId);
-          const tasksArr = await Promise.all(
-            columns.map(c => api.getTasksByColumn(token, c.id))
-          );
 
           const tasks = {};
-          columns.forEach((c, i) => {
-            tasks[c.id] = tasksArr[i];
+          columns.forEach(col => {
+            tasks[col.id] = (col.tasks || []).sort(
+              (a, b) => a.order - b.order
+            );
           });
 
           set({ columns, tasks, loading: false });
-        } catch {
+        } catch (e) {
+          console.error(e);
           set({ loading: false });
         }
       },
 
       loadSprints: async () => {
-        const { token, project } = get();
-        if (!token || !project) return;
+        const { token } = get();
+        if (!token) return;
 
         try {
-          const sprints = await api.getSprintsByProject(token, project.id);
+          const sprints = await api.getSprintsByProject(token);
           set({ sprints });
-        } catch {}
+        } catch (e) {
+          console.error(e);
+        }
       },
 
       // ===== COLUMNS =====
       addColumn: async (title) => {
-        const { token, project, columns, tasks } = get();
-        if (!token || !project) return;
-
-        const newColumn = await api.createColumn(token, title, project.id);
+        const { token, columns, tasks } = get();
+        const col = await api.createColumn(token, title);
         set({
-          columns: [...columns, newColumn],
-          tasks: { ...tasks, [newColumn.id]: [] },
+          columns: [...columns, col],
+          tasks: { ...tasks, [col.id]: [] },
         });
       },
 
-      updateColumnTitle: (columnId, title) =>
-        set(state => ({
-          columns: state.columns.map(c =>
-            c.id === columnId ? { ...c, title } : c
-          ),
-        })),
+      updateColumnColor: async (columnId, color) => {
+        const { token } = get();
+        await api.updateColumnColor(token, columnId, color);
 
-      updateColumnColor: (columnId, color) =>
         set(state => ({
           columns: state.columns.map(c =>
             c.id === columnId ? { ...c, color } : c
           ),
-        })),
-
-      deleteColumn: async (columnId) => {
-        const { token, project, columns, tasks } = get();
-        if (!token || !project) return;
-
-        await api.deleteColumn(token, project.id, columnId);
-
-        set({
-          columns: columns.filter(c => c.id !== columnId),
-          tasks: Object.fromEntries(
-            Object.entries(tasks).filter(([id]) => String(id) !== String(columnId))
-          ),
-        });
+        }));
       },
 
       // ===== TASKS =====
       addTask: async (columnId, title) => {
         const { token, tasks } = get();
-
-        const task = await api.createTask(
-          token,
-          title,
-          '',
-          columnId,
-          'low',
-          'todo',
-          null
-        );
+        const task = await api.createTask(token, title, '', columnId);
 
         set({
           tasks: {
@@ -141,29 +91,9 @@ export const useProjectStore = create(
         });
       },
 
-      updateTask: async (
-        taskId,
-        columnId,
-        title,
-        description,
-        priority,
-        status,
-        sprintId,
-        label
-      ) => {
+      updateTask: async (taskId, columnId, data) => {
         const { token, tasks } = get();
-        if (!token) return;
-
-        const updated = await api.updateTask(
-          token,
-          taskId,
-          title,
-          description,
-          priority,
-          status,
-          sprintId,
-          label
-        );
+        const updated = await api.updateTask(token, taskId, data);
 
         set({
           tasks: {
@@ -177,8 +107,6 @@ export const useProjectStore = create(
 
       deleteTask: async (taskId, columnId) => {
         const { token, tasks } = get();
-        if (!token) return;
-
         await api.deleteTask(token, columnId, taskId);
 
         set({
@@ -189,32 +117,35 @@ export const useProjectStore = create(
         });
       },
 
+  
       moveTaskLocally: (sourceColId, destColId, task, destIndex) =>
         set(state => {
-          const sourceTasks = [...(state.tasks[sourceColId] || [])];
-          const destTasks = [...(state.tasks[destColId] || [])];
+          const source = [...state.tasks[sourceColId]];
+          const dest = [...state.tasks[destColId]];
 
-          const index = sourceTasks.findIndex(t => t.id === task.id);
-          if (index === -1) return {};
+          source.splice(source.findIndex(t => t.id === task.id), 1);
+          dest.splice(destIndex, 0, { ...task, columnId: Number(destColId) });
 
-          sourceTasks.splice(index, 1);
-          destTasks.splice(destIndex, 0, { ...task, columnId: destColId });
+          source.forEach((t, i) => (t.order = i));
+          dest.forEach((t, i) => (t.order = i));
 
           return {
             tasks: {
               ...state.tasks,
-              [sourceColId]: sourceTasks,
-              [destColId]: destTasks,
+              [sourceColId]: source,
+              [destColId]: dest,
             },
           };
         }),
+
+      moveTask: async (taskId, targetColId, newOrder) => {
+        const { token } = get();
+        await api.moveTask(token, taskId, targetColId, newOrder);
+      },
     }),
     {
       name: 'project-store',
-      partialize: (state) => ({
-        theme: state.theme,
-        token: state.token,
-      }),
+      partialize: s => ({ token: s.token }),
     }
   )
 );
