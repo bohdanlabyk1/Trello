@@ -17,11 +17,15 @@ const labelColors = ['green', 'red', 'yellow'];
 
 const Task = ({ task, columnId }) => {
   const { deleteTask, loadComments, comments, updateTask } = useProjectStore();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [label, setLabel] = useState(task.label || '');
+  const [title, setTitle] = useState(task.title);
+
   const menuRef = useRef(null);
 
+  // ===== CLOSE MENU ON OUTSIDE CLICK =====
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -32,51 +36,78 @@ const Task = ({ task, columnId }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // ===== LOAD COMMENTS =====
   useEffect(() => {
     if (showComments) loadComments(task.id);
   }, [showComments, task.id, loadComments]);
 
+  // ===== DELETE =====
   const handleDelete = async () => {
     await deleteTask(task.id, columnId);
     setMenuOpen(false);
   };
 
+  // ===== LABEL =====
   const handleChangeLabel = async (newLabel) => {
     setLabel(newLabel);
-    await updateTask(
-      task.id,
-      columnId,
-      task.title,
-      task.description,
-      task.priority,
-      task.status,
-      task.sprintId,
-      newLabel
-    );
+    await updateTask(task.id, columnId, { label: newLabel });
+  };
+
+  // ===== TITLE =====
+  const handleTitleBlur = async () => {
+    if (!title.trim() || title === task.title) return;
+
+    await updateTask(task.id, columnId, { title });
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.target.blur();
+    }
+    if (e.key === 'Escape') {
+      setTitle(task.title);
+      e.target.blur();
+    }
   };
 
   return (
     <div className={`task-card priority-${task.priority || 'low'}`}>
       <div className="task-top">
         <div className="task-left">
-          {/* Кружечок мітки зліва */}
-          {label && <span className={`task-label-dot ${label}`}></span>}
+          {label && <span className={`task-label-dot ${label}`} />}
           <span className="task-icon">📄</span>
           <span className="task-id">{task.id}</span>
-          <span className="task-title">{task.title}</span>
+
+          {/* ✅ EDITABLE TITLE */}
+          <input
+            className="task-title-input"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            onKeyDown={handleTitleKeyDown}
+          />
         </div>
 
-        {/* Кнопка меню */}
-        <div className="task-menu-button" onClick={() => setMenuOpen(prev => !prev)}>⋯</div>
+        <div
+          className="task-menu-button"
+          onClick={() => setMenuOpen(prev => !prev)}
+        >
+          ⋯
+        </div>
       </div>
 
       <div className="task-footer">
-        <span className={`task-status ${task.status}`}>{statusLabel(task.status)}</span>
+        <span className={`task-status ${task.status}`}>
+          {statusLabel(task.status)}
+        </span>
       </div>
 
       {menuOpen && (
         <div ref={menuRef} className="task-menu">
-          <div className="task-menu-item" onClick={() => setShowComments(prev => !prev)}>
+          <div
+            className="task-menu-item"
+            onClick={() => setShowComments(prev => !prev)}
+          >
             💬 {showComments ? 'Hide comments' : 'Show comments'}
           </div>
 
@@ -92,7 +123,7 @@ const Task = ({ task, columnId }) => {
                   border: label === color ? '2px solid black' : ''
                 }}
                 onClick={() => handleChangeLabel(color)}
-              ></span>
+              />
             ))}
             <span
               style={{
@@ -115,7 +146,10 @@ const Task = ({ task, columnId }) => {
       )}
 
       {showComments && (
-        <CommentList taskId={task.id} comments={comments[task.id] || []} />
+        <CommentList
+          taskId={task.id}
+          comments={comments?.[task.id] || []}
+        />
       )}
     </div>
   );

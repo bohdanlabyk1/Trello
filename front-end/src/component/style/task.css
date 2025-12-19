@@ -1,102 +1,170 @@
-/* ===== TASK CARD ===== */
+/* ================================
+   TASK CARD
+================================ */
 .task-card {
   background: #ffffff;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px 10px;
   margin-bottom: 8px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 2px rgba(9, 30, 66, 0.25);
   position: relative;
   cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .task-card:hover {
   background: #f4f5f7;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(9, 30, 66, 0.3);
 }
 
-/* ===== PRIORITY STRIPE ===== */
-.priority-low { border-left: 4px solid #61bd4f; }
-.priority-medium { border-left: 4px solid #f2d600; }
-.priority-high { border-left: 4px solid #eb5a46; }
-
-/* ===== LABEL DOT ===== */
-.task-label-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+/* ================================
+   PRIORITY STRIPE
+================================ */
+.priority-low {
+  border-left: 4px solid #61bd4f;
 }
 
-/* кольори міток */
-.task-label-dot.green { background-color: #22c55e; }
-.task-label-dot.red { background-color: #ef4444; }
-.task-label-dot.yellow { background-color: #facc15; }
+.priority-medium {
+  border-left: 4px solid #f2d600;
+}
 
-/* ===== TOP ===== */
+.priority-high {
+  border-left: 4px solid #eb5a46;
+}
+
+/* ================================
+   TOP SECTION
+================================ */
 .task-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .task-left {
   display: flex;
   align-items: center;
   gap: 6px;
-  position: relative;
+  flex: 1;
 }
 
-/* кружечок мітки зліва */
-.task-left .task-label-dot {
-  position: relative;
-  top: 0;
-  left: 0;
+/* ================================
+   LABEL DOT
+================================ */
+.task-label-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-/* ===== MENU BUTTON ===== */
+.task-label-dot.green { background: #22c55e; }
+.task-label-dot.red { background: #ef4444; }
+.task-label-dot.yellow { background: #facc15; }
+
+/* ================================
+   ICON & ID
+================================ */
+.task-icon {
+  font-size: 14px;
+}
+
+.task-id {
+  font-size: 11px;
+  color: #6b778c;
+}
+
+/* ================================
+   TITLE INPUT (NO BORDER)
+================================ */
+.task-title-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #172b4d;
+  padding: 2px 4px;
+  width: 100%;
+  cursor: text;
+}
+
+.task-title-input:hover {
+  background: rgba(9, 30, 66, 0.04);
+  border-radius: 4px;
+}
+
+.task-title-input:focus {
+  background: rgba(9, 30, 66, 0.08);
+  border-radius: 4px;
+}
+
+
 .task-menu-button {
-  padding: 0 6px;
   font-size: 18px;
+  padding: 0 6px;
   color: #6b778c;
   cursor: pointer;
+  user-select: none;
 }
 
-.task-menu-button:hover { color: #172b4d; }
+.task-menu-button:hover {
+  color: #172b4d;
+}
 
-/* ===== FOOTER ===== */
-.task-footer { margin-top: 6px; }
+.task-footer {
+  margin-top: 6px;
+}
 
-.task-status { font-size: 12px; color: #6b778c; }
+.task-status {
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .task-status.todo { color: #6b778c; }
 .task-status.in-progress { color: #0052cc; }
 .task-status.review { color: #ff991f; }
 .task-status.done { color: #36b37e; }
 
-/* ===== MENU ===== */
 .task-menu {
   position: absolute;
-  top: 30px;
+  top: 32px;
   right: 6px;
   background: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-  min-width: 170px;
-  z-index: 20;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(9, 30, 66, 0.25);
+  min-width: 180px;
+  z-index: 50;
+  overflow: hidden;
 }
 
 .task-menu-item {
   padding: 8px 12px;
   font-size: 13px;
+  color: #172b4d;
   cursor: pointer;
-}
-
-.task-menu-item:hover { background: #f4f5f7; }
-.task-menu-item.delete { color: #c92a2a; }
-
-/* Мітки у меню */
-.task-menu .label-selector {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
+  gap: 6px;
+}
+
+.task-menu-item:hover {
+  background: #f4f5f7;
+}
+
+.task-menu-item.delete {
+  color: #c92a2a;
+}
+
+.task-menu .label-selector {
+  flex-wrap: wrap;
+}
+
+.task-menu .task-label-dot {
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.task-menu .task-label-dot:hover {
+  border-color: #172b4d;
 }

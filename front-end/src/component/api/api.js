@@ -84,12 +84,13 @@ export const createTask = (token, title, description, columnId,  priority, statu
   });
 
 
-export const updateTask = (token, columnId, taskId, data) =>
-  fetchData(`/columns/${columnId}/tasks/${taskId}`, {
+export const updateTask = (token, taskId, data) =>
+  fetchData(`/columns/0/tasks/${taskId}`, {
     method: 'PATCH',
     token,
     body: JSON.stringify(data),
   });
+
 
 export const deleteTask = (token, columnId, taskId) =>
   fetchData(`/columns/${columnId}/tasks/${taskId}`, { method: 'DELETE', token });
@@ -101,7 +102,6 @@ export const moveTask = (token, taskId, targetColumnId, newOrder) =>
     token,
     body: JSON.stringify({ targetColumnId, newOrder }),
   });
-
 
 
 // 🔹 Sprints

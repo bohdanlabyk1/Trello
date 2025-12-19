@@ -29,7 +29,7 @@ export class ColumnService {
 
     return this.columnRepo.find({
       where: { project: { id: projectId } },
-      relations: ['tasks'],
+      relations: ['tasks', 'tasks.sprint'],
        order: { order: 'ASC' },
     });
   }

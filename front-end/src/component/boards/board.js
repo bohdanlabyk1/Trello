@@ -5,65 +5,69 @@ import { useProjectStore } from './apiboardc';
 
 const Board = ({ projectId }) => {
   const {
-    token,
     columns,
     tasks,
+    sprints,
+    selectedSprintId,
+    setSelectedSprintId,
     loadColumns,
+    loadSprints,
     moveTaskLocally,
     moveTask,
+    token
   } = useProjectStore();
 
   useEffect(() => {
     if (token && projectId) {
       loadColumns(projectId);
+      loadSprints(projectId);
     }
-  }, [token, projectId, loadColumns]);
+  }, [token, projectId, loadColumns, loadSprints]);
 
   const onDragEnd = async ({ source, destination, draggableId }) => {
     if (!destination) return;
 
-    const fromColId = source.droppableId;
-    const toColId = destination.droppableId;
+    const task = tasks[source.droppableId]
+      .find(t => t.id === Number(draggableId));
 
-    if (
-      fromColId === toColId &&
-      source.index === destination.index
-    ) return;
-
-    const task = (tasks[fromColId] || []).find(
-      t => String(t.id) === draggableId
+    moveTaskLocally(
+      source.droppableId,
+      destination.droppableId,
+      task,
+      destination.index
     );
 
-    if (!task) return;
-
-    // 1️⃣ оптимістично оновлюємо UI
-    moveTaskLocally(fromColId, toColId, task, destination.index);
-
-    // 2️⃣ зберігаємо в БД
-    try {
-      await moveTask(
-        task.id,
-        Number(toColId),
-        destination.index
-      );
-    } catch (e) {
-      console.error('Move task failed', e);
-    }
+    await moveTask(task.id, Number(destination.droppableId), destination.index);
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div style={{ display: 'flex', gap: 16 }}>
-        {columns.map(col => (
-          <Column
-            key={col.id}
-            column={col}
-            tasks={tasks[col.id] || []}
-          />
+    <>
+      {/* ===== SPRINT FILTER ===== */}
+      <select
+        value={selectedSprintId}
+        onChange={e => setSelectedSprintId(e.target.value)}
+      >
+        <option value="all">All</option>
+        <option value="none">Backlog</option>
+        {sprints.map(s => (
+          <option key={s.id} value={s.id}>{s.name}</option>
         ))}
-      </div>
-    </DragDropContext>
+      </select>
+
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div style={{ display: 'flex', gap: 16 }}>
+          {columns.map(col => (
+            <Column
+              key={col.id}
+              column={col}
+              tasks={tasks[col.id] || []}
+              selectedSprintId={selectedSprintId}
+            />
+          ))}
+        </div>
+      </DragDropContext>
+    </>
   );
 };
+export default Board
 
-export default Board;

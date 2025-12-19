@@ -11,10 +11,16 @@ const Column = ({ column, tasks, selectedSprintId }) => {
   const [addingTask, setAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
-  const visibleTasks =
-    selectedSprintId === null
-      ? tasks
-      : tasks.filter(t => t.sprintId === selectedSprintId);
+ const visibleTasks = tasks.filter(task => {
+  if (selectedSprintId === 'all') return true;
+  if (selectedSprintId === 'none') return !task.sprint || !task.sprint.id;
+  return task.sprint?.id === Number(selectedSprintId);
+
+});
+console.log(tasks.map(t => ({
+  id: t.id,
+  sprint: t.sprint
+})));
 
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
@@ -54,7 +60,9 @@ const Column = ({ column, tasks, selectedSprintId }) => {
             style={{ minHeight: '50px' }}
           >
             {visibleTasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={String(task.id)} index={index}>
+              <Draggable key={task.id}
+               draggableId={String(task.id)}
+                 index={index}>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
