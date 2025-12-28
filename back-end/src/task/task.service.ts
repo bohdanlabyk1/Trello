@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Task } from './task.entity';
 import { Sprint } from 'src/sprint/sprint.entity';
 import { UpdateTaskDto } from './task.dto';
+import { ActivityService } from 'src/actyviti/actyviti.service';
 import { ColumnEntity } from 'src/column/column.entity';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class TaskService {
     private readonly columnRepo: Repository<ColumnEntity>,
      @InjectRepository(Sprint)
     private readonly sprintRepo: Repository<Sprint>,
+    private readonly activityService: ActivityService,
   ) {}
 
   async findByColumn(columnId: number, userId: number) {
@@ -31,11 +33,21 @@ export class TaskService {
 
     if (!hasAccess) throw new ForbiddenException('Access denied');
 
-    return this.taskRepo.find({
-      where: { column: { id: columnId } },
-      relations: ['comments'],
-      order: { order: 'ASC' }, 
-    });
+   return this.taskRepo.find({
+  where: { column: { id: columnId } },
+  relations: ['comments'],
+  select: {
+    id: true,
+    title: true,
+    description: true,
+    order: true,
+    status: true,
+    priority: true,
+    label: true,
+    sprintId: true,
+  },
+});
+
   }
 async update(
   id: number,
@@ -66,34 +78,70 @@ async update(
   if (dto.priority !== undefined) task.priority = dto.priority;
   if (dto.label !== undefined) task.label = dto.label;
 
-  if (dto.sprintId !== undefined) {
-    task.sprint = dto.sprintId
-      ? await this.sprintRepo.findOne({ where: { id: dto.sprintId } })
-      : null;
-  }
+ const oldStatus = task.status;
+
+if (dto.status !== undefined) {
+  task.status = dto.status;
+}
+
+if (dto.status !== undefined && oldStatus !== dto.status) {
+  await this.activityService.log({
+    projectId: task.column.project.id,
+    userId,
+    action: 'CHANGE_STATUS',
+    entityType: 'task',
+    entityId: task.id,
+    meta: {
+      from: oldStatus,
+      to: dto.status,
+    },
+  });
+}
+
 
   return this.taskRepo.save(task);
 }
 
+  async create(
+  title: string,
+  description: string,
+  columnId: number,
+  userId: number,
+  sprintId?: number | null,
+) {
+  const column = await this.columnRepo.findOne({
+    where: { id: columnId },
+    relations: ['project', 'project.owner', 'project.members'],
+  });
 
+  if (!column) throw new NotFoundException('Column not found');
 
-  async create(title: string, description: string, columnId: number, userId: number) {
-    const column = await this.columnRepo.findOne({
-      where: { id: columnId },
-      relations: ['project', 'project.owner', 'project.members'],
-    });
+  const hasAccess =
+    column.project.owner.id === userId ||
+    column.project.members.some(m => m.id === userId);
 
-    if (!column) throw new NotFoundException('Column not found');
+  if (!hasAccess) throw new ForbiddenException('Access denied');
 
-    const hasAccess =
-      column.project.owner.id === userId ||
-      column.project.members.some((m) => m.id === userId);
+  const task = this.taskRepo.create({
+    title,
+    description,
+    column,
+    sprintId: sprintId ?? null,
+  });
 
-    if (!hasAccess) throw new ForbiddenException('Access denied');
+  const savedTask = await this.taskRepo.save(task);
 
-    const task = this.taskRepo.create({ title, description, column });
-    return this.taskRepo.save(task);
-  }
+  await this.activityService.log({
+    projectId: column.project.id,
+    userId,
+    action: 'CREATE_TASK',
+    entityType: 'task',
+    entityId: savedTask.id,
+    meta: { title: savedTask.title },
+  });
+
+  return savedTask;
+}
 
   async delete(taskId: number, userId: number) {
     const task = await this.taskRepo.findOne({
@@ -108,6 +156,14 @@ async update(
       task.column.project.members.some((m) => m.id === userId);
 
     if (!hasAccess) throw new ForbiddenException('Access denied');
+await this.activityService.log({
+  projectId: task.column.project.id,
+  userId,
+  action: 'DELETE_TASK',
+  entityType: 'task',
+  entityId: task.id,
+  meta: { title: task.title },
+});
 
     return this.taskRepo.remove(task);
   }
@@ -119,9 +175,10 @@ async update(
   const task = await this.taskRepo.findOne({ where: { id: taskId } });
   if (!task) throw new NotFoundException('Task not found');
 
-  task.sprint = sprint;
+  task.sprintId = sprintId;
   return this.taskRepo.save(task);
 }
+
 async moveTask(
   taskId: number,
   targetColumnId: number,
@@ -146,37 +203,60 @@ async moveTask(
 
   if (!hasAccess) throw new ForbiddenException('Access denied');
 
-  const sourceColumn = await this.columnRepo.findOne({
-    where: { id: task.column.id },
-    relations: ['tasks'],
-  });
-
   const targetColumn = await this.columnRepo.findOne({
     where: { id: targetColumnId },
-    relations: ['tasks'],
+    relations: ['project', 'project.owner', 'project.members'],
   });
 
-  if (!sourceColumn || !targetColumn)
-    throw new NotFoundException('Column not found');
+  if (!targetColumn) throw new NotFoundException('Target column not found');
 
-  // 🧹 SOURCE: прибрати задачу і пересортувати
-  const sourceTasks = sourceColumn.tasks
+  const hasTargetAccess =
+    targetColumn.project.owner.id === userId ||
+    targetColumn.project.members.some(m => m.id === userId);
+
+  if (!hasTargetAccess) throw new ForbiddenException('Access denied');
+
+  const sourceColumnId = task.column.id;
+
+  /** ===== SOURCE COLUMN ===== */
+  const sourceTasks = await this.taskRepo.find({
+    where: { column: { id: sourceColumnId } },
+    order: { order: 'ASC' },
+  });
+
+  const updatedSource = sourceTasks
     .filter(t => t.id !== task.id)
-    .sort((a, b) => a.order - b.order);
+    .map((t, i) => ({ ...t, order: i }));
 
-  sourceTasks.forEach((t, i) => (t.order = i));
-
-  // 🎯 TARGET: вставити задачу
-  const targetTasks = targetColumn.tasks
-    .filter(t => t.id !== task.id)
-    .sort((a, b) => a.order - b.order);
-
-  targetTasks.splice(newOrder, 0, task);
-  targetTasks.forEach((t, i) => (t.order = i));
+  /** ===== TARGET COLUMN ===== */
+  const targetTasks = await this.taskRepo.find({
+    where: { column: { id: targetColumnId } },
+    order: { order: 'ASC' },
+  });
 
   task.column = targetColumn;
+  targetTasks.splice(newOrder, 0, task);
 
-  await this.taskRepo.save([...sourceTasks, ...targetTasks]);
+  const updatedTarget = targetTasks.map((t, i) => ({
+    ...t,
+    order: i,
+  }));
+  
+await this.activityService.log({
+  projectId: task.column.project.id,
+  userId,
+  action: 'MOVE_TASK',
+  entityType: 'task',
+  entityId: task.id,
+  meta: {
+    fromColumn: sourceColumnId,
+    toColumn: targetColumnId,
+  },
+});
+
+  await this.taskRepo.save([...updatedSource, ...updatedTarget]);
+
   return task;
 }
+
 }

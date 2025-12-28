@@ -10,39 +10,44 @@ const Board = ({ projectId }) => {
     sprints,
     selectedSprintId,
     setSelectedSprintId,
-    loadColumns,
-    loadSprints,
+    loadProjectData,
     moveTaskLocally,
     moveTask,
-    token
+    token,
   } = useProjectStore();
 
   useEffect(() => {
     if (token && projectId) {
-      loadColumns(projectId);
-      loadSprints(projectId);
+      loadProjectData(projectId);
     }
-  }, [token, projectId, loadColumns, loadSprints]);
+  }, [token, projectId, loadProjectData]);
 
   const onDragEnd = async ({ source, destination, draggableId }) => {
     if (!destination) return;
 
-    const task = tasks[source.droppableId]
-      .find(t => t.id === Number(draggableId));
+    const fromCol = Number(source.droppableId);
+    const toCol = Number(destination.droppableId);
+    const taskId = Number(draggableId);
 
-    moveTaskLocally(
-      source.droppableId,
-      destination.droppableId,
-      task,
-      destination.index
-    );
+    const task = tasks[fromCol]?.find(t => t.id === taskId);
+    if (!task) return;
 
-    await moveTask(task.id, Number(destination.droppableId), destination.index);
+    moveTaskLocally(fromCol, toCol, task, destination.index);
+    await moveTask(fromCol, taskId, toCol, destination.index);
   };
+
+  const normalizeSprintId = () => {
+    if (selectedSprintId === 'all' || selectedSprintId === 'none') {
+      return selectedSprintId;
+    }
+    return Number(selectedSprintId);
+  };
+
+  const sprintFilter = normalizeSprintId();
 
   return (
     <>
-      {/* ===== SPRINT FILTER ===== */}
+      {/* ===== Sprint filter ===== */}
       <select
         value={selectedSprintId}
         onChange={e => setSelectedSprintId(e.target.value)}
@@ -50,24 +55,39 @@ const Board = ({ projectId }) => {
         <option value="all">All</option>
         <option value="none">Backlog</option>
         {sprints.map(s => (
-          <option key={s.id} value={s.id}>{s.name}</option>
+          <option key={s.id} value={s.id}>
+            {s.name}
+          </option>
         ))}
       </select>
 
+      {/* ===== Board ===== */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div style={{ display: 'flex', gap: 16 }}>
-          {columns.map(col => (
-            <Column
-              key={col.id}
-              column={col}
-              tasks={tasks[col.id] || []}
-              selectedSprintId={selectedSprintId}
-            />
-          ))}
+          {columns.map(col => {
+            const columnTasks = tasks[col.id] || [];
+
+            const visibleTasks =
+              sprintFilter === 'all'
+                ? columnTasks
+                : sprintFilter === 'none'
+                ? columnTasks.filter(t => t.sprintId == null)
+                : columnTasks.filter(t => t.sprintId === sprintFilter);
+
+            return (
+              <Column
+                key={col.id}
+                column={col}
+                tasks={visibleTasks}
+                selectedSprintId={sprintFilter}
+                projectId={projectId}
+              />
+            );
+          })}
         </div>
       </DragDropContext>
     </>
   );
 };
-export default Board
 
+export default Board;

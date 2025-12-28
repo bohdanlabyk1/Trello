@@ -5,7 +5,7 @@ import Dashboard from "./component/Dashboard/Dashboard";
 import Header from "./component/Header/Header";
 import Project from "./component/Project/Project";
 import { useProjectStore } from "./component/boards/apiboardc";
-import "./app.css";
+import "./component/style/app.css";
 
 function App() {
   return (

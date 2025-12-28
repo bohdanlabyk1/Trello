@@ -21,10 +21,10 @@ const fetchData = async (endpoint, options = {}) => {
     throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
   }
 
-  return await response.json();
+  return response.json();
 };
 
-// 🔹 Auth
+// ===== AUTH =====
 export const loginUser = (email, password) =>
   fetchData('/auth-user/login', {
     method: 'POST',
@@ -37,7 +37,7 @@ export const registerUser = (username, email, password, repit_password) =>
     body: JSON.stringify({ username, email, password, repit_password }),
   });
 
-// 🔹 Projects
+// ===== PROJECTS =====
 export const getUserProjects = (token) =>
   fetchData('/projects', { method: 'GET', token });
 
@@ -48,15 +48,24 @@ export const createProject = (token, name, description) =>
     body: JSON.stringify({ name, description }),
   });
 
-export const deleteProject = (token, projectId) =>
-  fetchData(`/projects/${projectId}`, { method: 'DELETE', token });
-
-// 🔹 Columns
-export const getColumnsByProject = (token, projectId) =>
-  fetchData(`/projects/${projectId}/columns`, {
+export const getActivityLogs = (token, projectId) =>
+  fetchData(`/activity/${projectId}`, {
     method: 'GET',
     token,
   });
+export const clearActivityLogs = (token, projectId) =>
+  fetchData(`/activity/project/${projectId}`, {
+    method: 'DELETE',
+    token,
+  });
+
+
+export const deleteProject = (token, projectId) =>
+  fetchData(`/projects/${projectId}`, { method: 'DELETE', token });
+
+// ===== COLUMNS =====
+export const getColumnsByProject = (token, projectId) =>
+  fetchData(`/projects/${projectId}/columns`, { method: 'GET', token });
 
 export const createColumn = (token, title, projectId) =>
   fetchData(`/projects/${projectId}/columns`, {
@@ -71,40 +80,45 @@ export const deleteColumn = (token, projectId, columnId) =>
     token,
   });
 
-// 🔹 Tasks
+export const updateColumnColor = (token, columnId, color) =>
+  fetchData(`/projects/columns/${columnId}/color`, {
+    method: 'PATCH',
+    token,
+    body: JSON.stringify({ color }),
+  });
+
+// ===== TASKS =====
 export const getTasksByColumn = (token, columnId) =>
   fetchData(`/columns/${columnId}/tasks`, { method: 'GET', token });
 
-
-export const createTask = (token, title, description, columnId,  priority, status, sprintId) =>
+export const createTask = (token, { title, columnId, description = '', priority = 'low', status = 'todo', sprintId = null }) =>
   fetchData(`/columns/${columnId}/tasks`, {
     method: 'POST',
     token,
-    body: JSON.stringify({ title, description,  priority, status, sprintId }),
+    body: JSON.stringify({ title, description, priority, status, sprintId }),
   });
 
-
-export const updateTask = (token, taskId, data) =>
-  fetchData(`/columns/0/tasks/${taskId}`, {
+export const updateTask = (token, columnId, taskId, data) =>
+  fetchData(`/columns/${columnId}/tasks/${taskId}`, {
     method: 'PATCH',
     token,
     body: JSON.stringify(data),
   });
 
-
-export const deleteTask = (token, columnId, taskId) =>
-  fetchData(`/columns/${columnId}/tasks/${taskId}`, { method: 'DELETE', token });
-
-
-export const moveTask = (token, taskId, targetColumnId, newOrder) =>
-  fetchData(`/columns/0/tasks/${taskId}/move`, {
+export const moveTask = (token, columnId, taskId, targetColumnId, newOrder) =>
+  fetchData(`/columns/${columnId}/tasks/${taskId}/move`, {
     method: 'PATCH',
     token,
     body: JSON.stringify({ targetColumnId, newOrder }),
   });
 
+export const deleteTask = (token, columnId, taskId) =>
+  fetchData(`/columns/${columnId}/tasks/${taskId}`, {
+    method: 'DELETE',
+    token,
+  });
 
-// 🔹 Sprints
+// ===== SPRINTS =====
 export const getSprintsByProject = (token, projectId) =>
   fetchData(`/sprints/project/${projectId}`, { method: 'GET', token });
 
@@ -115,36 +129,25 @@ export const createSprint = (token, { name, startDate, endDate, projectId }) =>
     body: JSON.stringify({ name, startDate, endDate, projectId }),
   });
 
-// 🔹 Invitations
-export const getInvitations = (token) =>
-  fetchData('/invitations', { method: 'GET', token });
-
-export const respondInvitation = (token, id, accept) =>
-  fetchData(`/invitations/${id}/respond`, {
+export const activateSprint = (token, sprintId, projectId) =>
+  fetchData(`/sprints/${sprintId}/activate`, {
     method: 'POST',
     token,
-    body: JSON.stringify({ accept }),
+    body: JSON.stringify({ projectId }),
   });
 
-export const inviteUserToProject = (token, email, projectId) =>
-  fetchData('/invitations/invite', {
+export const closeSprint = (token, sprintId) =>
+  fetchData(`/sprints/${sprintId}/close`, {
     method: 'POST',
     token,
-    body: JSON.stringify({ email, projectId }),
   });
 
-// 🔹 Users in project
-export const getProjectUsers = (token, projectId) =>
-  fetchData(`/projects/${projectId}/users`, { method: 'GET', token });
-
-export const addUserToProject = (token, projectId, email) =>
-  fetchData(`/projects/${projectId}/users`, {
-    method: 'POST',
+export const deleteSprint = (token, sprintId) =>
+  fetchData(`/sprints/${sprintId}`, {
+    method: 'DELETE',
     token,
-    body: JSON.stringify({ email }),
   });
 
-// 🔹 Comments
 export const createComment = (token, text, taskId) =>
   fetchData('/comments', {
     method: 'POST',
@@ -157,30 +160,30 @@ export const deleteComment = (token, commentId) =>
 
 export const getCommentsByTask = (token, taskId) =>
   fetchData(`/comments/task/${taskId}`, { method: 'GET', token });
-export const activateSprint = (token, sprintId, projectId) =>
-  fetchData(`/sprints/${sprintId}/activate`, {
+
+export const getProjectUsers = (token, projectId) =>
+  fetchData(`/projects/${projectId}/users`, { method: 'GET', token });
+
+export const inviteUserToProject = (token, email, projectId) =>
+  fetchData('/invitations/invite', {
     method: 'POST',
     token,
-    body: JSON.stringify({ projectId })
+    body: JSON.stringify({ email, projectId }),
   });
 
-export const closeSprint = (token, sprintId) =>
-  fetchData(`/sprints/${sprintId}/close`, {
+export const getInvitations = (token) =>
+  fetchData('/invitations', { method: 'GET', token });
+
+export const respondInvitation = (token, id, accept) =>
+  fetchData(`/invitations/${id}/respond`, {
     method: 'POST',
-    token
+    token,
+    body: JSON.stringify({ accept }),
   });
 
- export const assignTaskToSprint = (token, columnId, taskId, sprintId) =>
+export const assignTaskToSprint = (token, columnId, taskId, sprintId) =>
   fetchData(`/columns/${columnId}/tasks/${taskId}/assign-sprint`, {
     method: 'POST',
     token,
     body: JSON.stringify({ sprintId }),
   });
-export const updateColumnColor = (token, columnId, color) =>
-  fetchData(`/projects/columns/${columnId}/color`, {
-    method: 'PATCH',
-    token,
-    body: JSON.stringify({ color }),
-  });
-
-

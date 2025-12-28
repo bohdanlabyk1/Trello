@@ -1,62 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import './../style/style.css';
+import React, { useState, useEffect } from 'react';
+import './../style/project.css';
 import { useNavigate } from 'react-router-dom';
-import { getUserProjects, createProject, deleteProject } from '../api/api';
+import {
+  getUserProjects,
+  createProject,
+  deleteProject,
+} from '../api/api';
 import { useProjectStore } from '../boards/apiboardc';
 
 const Project = ({ ismodal, setIsmodal }) => {
   const [projects, setProjects] = useState([]);
-  const [newProject, setNewProject] = useState({ name: '', description: '' });
+  const [newProject, setNewProject] = useState({
+    name: '',
+    description: '',
+  });
+
   const navigate = useNavigate();
+  const { loadProjectData } = useProjectStore();
 
-  const { setProject, loadColumns } = useProjectStore();
-
+  // ===== LOAD PROJECTS =====
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    getUserProjects(token).then(data => {
+    const loadProjects = async () => {
+      const data = await getUserProjects(token);
       setProjects(data);
       if (data.length === 0) setIsmodal(true);
-    });
+    };
+
+    loadProjects();
   }, [setIsmodal]);
 
-  const handleOpenProject = async (project) => {
-    setProject(project);
-    await loadColumns(project.id);
+  // ===== OPEN PROJECT =====
+  const handleOpenProject = async project => {
+    await loadProjectData(project.id);
     navigate(`/project/${project.id}`);
   };
 
+  // ===== CREATE PROJECT =====
   const handleCreateProject = async () => {
     const token = localStorage.getItem('token');
-    if (!newProject.name) {
+
+    if (!newProject.name.trim()) {
       alert('Введіть назву проекту');
       return;
     }
 
     try {
-      const newProj = await createProject(
+      const createdProject = await createProject(
         token,
         newProject.name,
         newProject.description
       );
 
-      setProjects(prev => [...prev, newProj]);
-      setProject(newProj);
+      setProjects(prev => [...prev, createdProject]);
       setIsmodal(false);
 
-      await loadColumns(newProj.id);
-      navigate(`/project/${newProj.id}`);
-    } catch (e) {
-      console.error(e);
+      await loadProjectData(createdProject.id);
+      navigate(`/project/${createdProject.id}`);
+    } catch (error) {
+      console.error(error);
       alert('Не вдалося створити проект');
     }
   };
 
-  const handleDeleteProject = async (id) => {
+  // ===== DELETE PROJECT =====
+  const handleDeleteProject = async projectId => {
     const token = localStorage.getItem('token');
-    await deleteProject(token, id);
-    setProjects(prev => prev.filter(p => p.id !== id));
+    await deleteProject(token, projectId);
+
+    setProjects(prev => prev.filter(p => p.id !== projectId));
   };
 
   return (
@@ -64,16 +78,24 @@ const Project = ({ ismodal, setIsmodal }) => {
       <h2>Мої проекти</h2>
 
       <div className="projects-list">
-        {projects.map(p => (
-          <div key={p.id} className="project-card">
+        <button
+      className="create-project-btn"
+      onClick={() => setIsmodal(true)}
+    >
+      + Створити проект
+    </button>
+        {projects.map(project => (
+          <div key={project.id} className="project-card">
             <h3
               style={{ cursor: 'pointer' }}
-              onClick={() => handleOpenProject(p)}
+              onClick={() => handleOpenProject(project)}
             >
-              {p.name}
+              {project.name}
             </h3>
-            <p>{p.description}</p>
-            <button onClick={() => handleDeleteProject(p.id)}>
+
+            <p>{project.description}</p>
+
+            <button onClick={() => handleDeleteProject(project.id)}>
               Видалити
             </button>
           </div>
@@ -89,7 +111,10 @@ const Project = ({ ismodal, setIsmodal }) => {
               placeholder="Назва проекту"
               value={newProject.name}
               onChange={e =>
-                setNewProject({ ...newProject, name: e.target.value })
+                setNewProject({
+                  ...newProject,
+                  name: e.target.value,
+                })
               }
             />
 
@@ -97,12 +122,19 @@ const Project = ({ ismodal, setIsmodal }) => {
               placeholder="Опис"
               value={newProject.description}
               onChange={e =>
-                setNewProject({ ...newProject, description: e.target.value })
+                setNewProject({
+                  ...newProject,
+                  description: e.target.value,
+                })
               }
             />
 
-            <button onClick={handleCreateProject}>Створити</button>
-            <button onClick={() => setIsmodal(false)}>Скасувати</button>
+            <button onClick={handleCreateProject}>
+              Створити
+            </button>
+            <button onClick={() => setIsmodal(false)}>
+              Скасувати
+            </button>
           </div>
         </div>
       )}

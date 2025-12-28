@@ -20,9 +20,10 @@ export class TaskController {
     @Param('columnId') columnId: number,
     @Body('title') title: string,
     @Body('description') description: string,
+     @Body('sprintId') sprintId: number | null,
     @Req() req,
   ) {
-    return this.taskService.create(title, description, columnId, req.user.id);
+    return this.taskService.create(title, description, columnId, req.user.id, sprintId);
   }
 
   @Delete(':id')

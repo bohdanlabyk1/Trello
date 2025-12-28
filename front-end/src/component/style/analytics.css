@@ -1,0 +1,113 @@
+/* ===== ROOT ===== */
+.analytics {
+  padding: 24px;
+  background: var(--bg, #f8fafc);
+  color: var(--text, #0f172a);
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* ===== TITLES ===== */
+.analytics h2 {
+  font-size: 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.analytics h3 {
+  margin: 32px 0 12px;
+  font-size: 20px;
+  color: #334155;
+}
+
+/* ===== KPI CARDS ===== */
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.analytics .card {
+  background: linear-gradient(135deg, #ffffff, #f1f5f9);
+  border-radius: 16px;
+  padding: 20px;
+  font-size: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.analytics .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+.analytics .card b {
+  font-size: 18px;
+  color: #2563eb;
+}
+
+/* ===== CHART BLOCK ===== */
+.analytics .recharts-responsive-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+/* ===== USERS LIST ===== */
+.analytics ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.analytics ul li {
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.analytics ul li::before {
+  content: "👤";
+}
+
+/* ===== DARK THEME ===== */
+body[data-theme="dark"] .analytics {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+body[data-theme="dark"] .analytics .card,
+body[data-theme="dark"] .analytics .recharts-responsive-container,
+body[data-theme="dark"] .analytics ul li {
+  background: #0f172a;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+body[data-theme="dark"] .analytics h3 {
+  color: #cbd5f5;
+}
+
+body[data-theme="dark"] .analytics .card b {
+  color: #60a5fa;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

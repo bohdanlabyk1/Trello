@@ -4,7 +4,7 @@ import Task from './Task';
 import { useProjectStore } from './apiboardc';
 import './../style/style.css';
 
-const Column = ({ column, tasks, selectedSprintId }) => {
+const Column = ({ column, tasks, isDragDisabled }) => {
   const {
     updateColumnTitle,
     deleteColumn,
@@ -17,17 +17,13 @@ const Column = ({ column, tasks, selectedSprintId }) => {
   const [addingTask, setAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
-  const isTaskVisible = (task) => {
-    if (selectedSprintId === 'all') return true;
-    if (selectedSprintId === 'none') {
-      return !task.sprint || !task.sprint.id;
-    }
-    return task.sprint?.id === Number(selectedSprintId);
-  };
-
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
-    await addTask(column.id, newTaskTitle);
+   await addTask({
+  title: newTaskTitle,
+  columnId: column.id,
+});
+
     setNewTaskTitle('');
     setAddingTask(false);
   };
@@ -49,9 +45,7 @@ const Column = ({ column, tasks, selectedSprintId }) => {
         <input
           type="color"
           value={column.color || '#3b82f6'}
-          onChange={(e) =>
-            updateColumnColor(column.id, e.target.value)
-          }
+          onChange={(e) => updateColumnColor(column.id, e.target.value)}
         />
 
         <button onClick={() => setMenuOpen(p => !p)}>⋮</button>
@@ -79,18 +73,14 @@ const Column = ({ column, tasks, selectedSprintId }) => {
                 key={task.id}
                 draggableId={String(task.id)}
                 index={index}
+                isDragDisabled={isDragDisabled}
               >
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    style={{
-                      ...provided.draggableProps.style,
-                      display: isTaskVisible(task)
-                        ? 'block'
-                        : 'none'
-                    }}
+                    style={provided.draggableProps.style}
                   >
                     <Task task={task} columnId={column.id} />
                   </div>
@@ -110,9 +100,7 @@ const Column = ({ column, tasks, selectedSprintId }) => {
             autoFocus
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === 'Enter' && handleAddTask()
-            }
+            onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
             onBlur={() => setAddingTask(false)}
           />
         ) : (

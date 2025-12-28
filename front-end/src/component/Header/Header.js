@@ -1,30 +1,35 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './../style/style.css';
+import './../style/header.css';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import { SiTrello } from 'react-icons/si';
 import { useNavigate } from 'react-router-dom';
 import InvitationsPanel from '../User/invitation';
 import { useProjectStore } from './../boards/apiboardc';
 
-const Header = ({ onCreateProject }) => {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
   const menuRef = useRef(null);
   const bellRef = useRef(null);
-  const navigate = useNavigate();
-   const toggleTheme = useProjectStore(state => state.toggleTheme);
-  const theme = useProjectStore(state => state.theme);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleNotifications = () => setIsNotificationsOpen(!isNotificationsOpen);
+  const navigate = useNavigate();
+
+  const toggleTheme = useProjectStore(state => state.toggleTheme);
+  const theme = useProjectStore(state => state.theme);
+  const user = useProjectStore(state => state.user);
+  const logout = useProjectStore(state => state.logout);
+
+  const toggleMenu = () => setIsMenuOpen(prev => !prev);
+  const toggleNotifications = () => setIsNotificationsOpen(prev => !prev);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/');
   };
 
   const handleLogoClick = () => {
-    navigate('/dashboard'); // ✅ Перехід на головну сторінку з проєктами
+    navigate('/dashboard');
   };
 
   useEffect(() => {
@@ -39,6 +44,7 @@ const Header = ({ onCreateProject }) => {
         setIsNotificationsOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -47,25 +53,38 @@ const Header = ({ onCreateProject }) => {
 
   return (
     <header className="header">
-       <button onClick={toggleTheme}>
-        {theme === "light" ? "🌙" : "☀️"}
+      {/* THEME */}
+      <button onClick={toggleTheme}>
+        {theme === 'light' ? '🌙' : '☀️'}
       </button>
-      <div className="header__left" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
+
+      {/* LOGO */}
+      <div
+        className="header__left"
+        onClick={handleLogoClick}
+        style={{ cursor: 'pointer' }}
+      >
         <SiTrello className="header__logo" />
         <span className="header__logo-text">Trello</span>
       </div>
 
+      {/* SEARCH */}
       <div className="header__center">
-        <input type="text" placeholder="Пошук..." className="header__search" />
+        <input
+          type="text"
+          placeholder="Пошук..."
+          className="header__search"
+        />
       </div>
 
+      {/* RIGHT */}
       <div className="header__right">
-        <button className="create-btn" onClick={onCreateProject}>
-          + Створити проект
-        </button>
-
+        {/* NOTIFICATIONS */}
         <div className="notification-container" ref={bellRef}>
-          <FaBell className="header__icon" onClick={toggleNotifications} />
+          <FaBell
+            className="header__icon"
+            onClick={toggleNotifications}
+          />
           {isNotificationsOpen && (
             <div className="notifications-dropdown">
               <InvitationsPanel token={token} />
@@ -73,11 +92,22 @@ const Header = ({ onCreateProject }) => {
           )}
         </div>
 
+        {/* USER MENU */}
         <div className="user-menu" ref={menuRef}>
-          <FaUserCircle className="header__icon" onClick={toggleMenu} />
+          <FaUserCircle
+            className="header__icon"
+            onClick={toggleMenu}
+          />
+
           {isMenuOpen && (
             <div className="dropdown-menu">
-              <button onClick={handleLogout}>Вийти</button>
+              <div className="user-info">
+                <strong>{user?.username}</strong>
+              </div>
+
+              <button onClick={handleLogout}>
+                Вийти
+              </button>
             </div>
           )}
         </div>

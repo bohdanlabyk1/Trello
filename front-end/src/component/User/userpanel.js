@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getProjectUsers, inviteUserToProject } from '../api/api';
-import './../style/style.css';
+import './../style/user.css';
 
 export default function UsersPanel({ token, projectId, onClose }) {
   const [users, setUsers] = useState([]);

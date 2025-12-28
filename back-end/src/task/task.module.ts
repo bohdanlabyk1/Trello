@@ -6,10 +6,11 @@ import { Task } from './task.entity';
 import { ColumnEntity } from 'src/column/column.entity';
 import { AuthUserModule } from 'src/auth-user/auth-user.module';
 import { Sprint } from 'src/sprint/sprint.entity';
+import { ActivityModule } from 'src/actyviti/actyviti.module';
 
 @Module({
    imports: [TypeOrmModule.forFeature([Task, ColumnEntity, Sprint]),
-  AuthUserModule],
+  AuthUserModule,  ActivityModule,],
   controllers:
    [TaskController,
   ],

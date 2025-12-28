@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import './../style/style.css';
+import './../style/authform.css';
 import { loginUser, registerUser } from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import { useProjectStore } from './../boards/apiboardc';
 
 export const Authform = () => {
   const navigate = useNavigate();
-  const { setToken } = useProjectStore.getState(); // ⚡ отримуємо setToken зі store
+  const { setToken, setUser } = useProjectStore.getState(); // ⚡ отримуємо setToken зі store
 
   const [isLogin, setIsLogin] = useState(true);
   const [animating, setAnimating] = useState(false);
@@ -40,11 +40,13 @@ export const Authform = () => {
             formData.repit_password
           );
 
-      // ⚡ Перевірка токена
+      
       const token = result.token || result.data?.token;
+      const user = result.user;
       if (!token) throw new Error('Токен не отримано від сервера');
 
-      setToken(token); // ⚡ зберігаємо токен у Zustand
+      setToken(token); 
+      setUser(user);
       navigate('/dashboard');
 
       setFormData({

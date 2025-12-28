@@ -7,6 +7,7 @@ import { Comment } from 'src/coments/coment.entity';
 import { Task } from 'src/task/task.entity';
 import { Invitation } from 'src/invitation/invitation.entiti';
 import { Sprint } from 'src/sprint/sprint.entity';
+import { ActivityLog } from '../actyviti/actyviti.entiti';
 
 @Module({
   imports: [
@@ -19,9 +20,9 @@ import { Sprint } from 'src/sprint/sprint.entity';
       database: 'trello',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint], 
+      entities: [Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog], 
     }),
-    TypeOrmModule.forFeature([Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint]),
+    TypeOrmModule.forFeature([Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog]),
   ],
 })
 export class DatabaseModule {}

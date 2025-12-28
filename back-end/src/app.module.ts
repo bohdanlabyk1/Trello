@@ -7,6 +7,7 @@ import { ColumnModule } from './column/column.module';
 import { ComentsModule } from './coments/coments.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { SprintModule } from './sprint/sprint.module';
+import { ActivityModule } from './actyviti/actyviti.module';
 
 
 
@@ -20,6 +21,7 @@ import { SprintModule } from './sprint/sprint.module';
     ComentsModule,
     InvitationModule,
     SprintModule,
+    ActivityModule,
    ],
 })
 export class AppModule {}

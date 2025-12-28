@@ -1,5 +1,5 @@
 // task.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, JoinColumn, Column, ManyToOne, OneToMany } from "typeorm";
 import { ColumnEntity } from "./../column/column.entity";
 import { Sprint } from "src/sprint/sprint.entity";
 import { Comment } from "./../coments/coment.entity";
@@ -33,7 +33,14 @@ column: ColumnEntity;
   @OneToMany(() => Comment, (comment) => comment.task, { cascade: true })
   comments: Comment[];
 
-  @ManyToOne(() => Sprint, (sprint) => sprint.tasks, { nullable: true, onDelete: 'SET NULL' })
+@Column({ nullable: true })
+sprintId: number | null;
+
+@ManyToOne(() => Sprint, (sprint) => sprint.tasks, {
+  nullable: true,
+  onDelete: 'SET NULL',
+})
+@JoinColumn({ name: 'sprintId' })
 sprint: Sprint | null;
 
 }

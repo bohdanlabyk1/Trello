@@ -5,6 +5,8 @@ import UsersPanel from './../User/userpanel';
 import Board from './../boards/board';
 import Sprint from './sprint';
 import './../style/style.css';
+import Analytics from '../analytics/Analytics';
+import ActivityLog from './../activyti/Activyti';
 
 const Dashboard = () => {
   const { id } = useParams();
@@ -51,12 +53,28 @@ const Dashboard = () => {
           >
             👥 Користувачі
           </li>
+         <li
+           className={`menu-item ${activeTab === 'analytics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analytics')}
+           >
+           📊 Аналітика
+         </li>
+          <li
+  className={`menu-item ${activeTab === 'activity' ? 'active' : ''}`}
+  onClick={() => setActiveTab('activity')}
+>
+  🕒 Активність
+</li>
         </ul>
       </div>
 
       <div className="dashboard-content">
         {activeTab === 'board' && <Board projectId={project.id} />}
         {activeTab === 'sprint' && <Sprint projectId={project.id} />}
+        {activeTab === 'analytics' && <Analytics />}
+        {activeTab === 'activity' && <ActivityLog projectId={project.id} />}
+
+
       </div>
 
       {isUsersModalOpen && (
