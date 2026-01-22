@@ -1,22 +1,28 @@
-import React, { useState } from 'react';
-import './../style/authform.css';
-import { loginUser, registerUser } from '../api/api';
-import { useNavigate } from 'react-router-dom';
-import { useProjectStore } from './../boards/apiboardc';
+import React, { useState } from "react";
+import "./../style/authform.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { loginUser, registerUser } from "../api/api";
+import { useNavigate } from "react-router-dom";
+import { useProjectStore } from "./../boards/apiboardc";
 
 export const Authform = () => {
   const navigate = useNavigate();
-  const { setToken, setUser } = useProjectStore.getState(); // ⚡ отримуємо setToken зі store
+  const { setToken, setUser } = useProjectStore.getState();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
   const [isLogin, setIsLogin] = useState(true);
   const [animating, setAnimating] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    repit_password: '',
+    username: "",
+    email: "",
+    password: "",
+    repit_password: "",
   });
+
+  const usernameRegex = /^[a-z0-9]{4,}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z]).{5,}$/;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,8 +32,23 @@ export const Authform = () => {
     e.preventDefault();
 
     if (!isLogin && formData.password !== formData.repit_password) {
-      setMessage('Паролі не співпадають');
+      setMessage("Passwords do not match");
       return;
+    }
+    if (!isLogin) {
+      if (!usernameRegex.test(formData.username)) {
+        setMessage(
+          "Username must be at least 4 characters long and contain only lowercase letters and numbers"
+        );
+        return;
+      }
+
+      if (!passwordRegex.test(formData.password)) {
+        setMessage(
+          "Пароль має містити щонайменше 5 символів та містити великі, малі літери "
+        );
+        return;
+      }
     }
 
     try {
@@ -40,100 +61,133 @@ export const Authform = () => {
             formData.repit_password
           );
 
-      
       const token = result.token || result.data?.token;
       const user = result.user;
-      if (!token) throw new Error('Токен не отримано від сервера');
 
-      setToken(token); 
+      if (!token) throw new Error("Token not received");
+
+      setToken(token);
       setUser(user);
-      navigate('/dashboard');
-
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        repit_password: '',
-      });
-      setMessage('');
+      navigate("/dashboard");
     } catch (error) {
-      setMessage('Помилка: ' + error.message);
+      setMessage(error.message || "Something went wrong");
     }
   };
 
   const toggleForm = () => {
     setAnimating(true);
     setTimeout(() => {
-      setIsLogin(prev => !prev);
+      setIsLogin((prev) => !prev);
+      setMessage("");
       setAnimating(false);
-      setMessage('');
     }, 300);
   };
 
   return (
-    <div className="box-content">
-      <div className={`form-wrapper ${animating ? 'fade-out' : 'fade-in'}`}>
+    <div className="auth-container">
+      <div className={`form-wrapper ${animating ? "fade-out" : "fade-in"}`}>
         <form onSubmit={handleSubmit}>
-          <h1>{isLogin ? 'Login' : 'Register'}</h1>
+          <h1>{isLogin ? "Login" : "Register"}</h1>
 
           {!isLogin && (
-            <>
-              <label htmlFor="username">Username</label>
+            <div className="input-group">
+              <label>Username</label>
               <input
                 type="text"
                 name="username"
-                placeholder="Username"
+                placeholder="Enter username"
                 value={formData.username}
                 onChange={handleChange}
                 required
               />
-            </>
+            </div>
           )}
 
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <div className="input-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+          <div className="input-group">
+            <label>Password</label>
 
-          {!isLogin && (
-            <>
-              <label htmlFor="repit_password">Repeat Password</label>
+            <div className="password-wrapper">
               <input
-                type="password"
-                name="repit_password"
-                placeholder="Repeat Password"
-                value={formData.repit_password}
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter password"
+                value={formData.password}
                 onChange={handleChange}
                 required
               />
-            </>
+
+              <span
+                className="eye-icon"
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+          </div>
+
+          {!isLogin && (
+            <div className="input-group">
+              <label>Repeat Password</label>
+
+              <div className="password-wrapper">
+                <input
+                  type={showRepeatPassword ? "text" : "password"}
+                  name="repit_password"
+                  placeholder="Repeat password"
+                  value={formData.repit_password}
+                  onChange={handleChange}
+                  required
+                />
+
+                <span
+                  className="eye-icon"
+                  onClick={() => setShowRepeatPassword((prev) => !prev)}
+                >
+                  {showRepeatPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+            </div>
           )}
 
-          {message && <p className="error">{message}</p>}
+          {message && <div className="error">{message}</div>}
 
-          <input type="submit" value={isLogin ? 'Login' : 'Register'} className="btn" />
+          <button className="btn" type="submit">
+            {isLogin ? "Login" : "Register"}
+          </button>
         </form>
       </div>
 
       <div className="panel">
-        <h2>{isLogin ? "Don't have an account?" : "Already have an account?"}</h2>
+        <h2>{isLogin ? "Welcome Back!" : "Hello, Friend!"}</h2>
+
+        <p className="panel-text">
+          {isLogin
+            ? "Sign in to continue your journey with us"
+            : "Create an account and start your journey with us"}
+        </p>
+
+        <div className="panel-divider"></div>
+
+        <p className="panel-small">
+          {isLogin
+            ? "We are glad to see you again"
+            : "It takes only a few seconds to get started"}
+        </p>
+
         <button className="toggle-btn" onClick={toggleForm}>
-          {isLogin ? 'Register' : 'Login'}
+          {isLogin ? "Create account" : "Sign in"}
         </button>
       </div>
     </div>

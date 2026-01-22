@@ -1,113 +1,114 @@
-import React, { useState, useRef, useEffect } from 'react';
-import './../style/header.css';
-import { FaBell, FaUserCircle } from 'react-icons/fa';
-import { SiTrello } from 'react-icons/si';
-import { useNavigate } from 'react-router-dom';
-import InvitationsPanel from '../User/invitation';
-import { useProjectStore } from './../boards/apiboardc';
+import React, { useState, useRef, useEffect } from "react";
+import "./../style/header.css";
+import { FaBell, FaUserCircle } from "react-icons/fa";
+import { SiTrello } from "react-icons/si";
+import { useNavigate } from "react-router-dom";
+import InvitationsPanel from "../User/invitation";
+import { useProjectStore } from "./../boards/apiboardc";
+import { getInvitationsCount, getNotificationsCount } from "../api/api";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [inviteCount, setInviteCount] = useState(0);
 
   const menuRef = useRef(null);
   const bellRef = useRef(null);
 
-  const navigate = useNavigate();
-
-  const toggleTheme = useProjectStore(state => state.toggleTheme);
-  const theme = useProjectStore(state => state.theme);
-  const user = useProjectStore(state => state.user);
-  const logout = useProjectStore(state => state.logout);
-
-  const toggleMenu = () => setIsMenuOpen(prev => !prev);
-  const toggleNotifications = () => setIsNotificationsOpen(prev => !prev);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const handleLogoClick = () => {
-    navigate('/dashboard');
-  };
+  const toggleTheme = useProjectStore((state) => state.toggleTheme);
+  const theme = useProjectStore((state) => state.theme);
+  const user = useProjectStore((state) => state.user);
+  const logout = useProjectStore((state) => state.logout);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    if (!token) return;
+
+    const loadCounts = async () => {
+      try {
+        const invites = await getInvitationsCount(token);
+        const notifications = await getNotificationsCount(token);
+
+        setInviteCount(invites.count + notifications.count);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    loadCounts();
+  }, [token]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
       if (
         menuRef.current &&
-        !menuRef.current.contains(event.target) &&
+        !menuRef.current.contains(e.target) &&
         bellRef.current &&
-        !bellRef.current.contains(event.target)
+        !bellRef.current.contains(e.target)
       ) {
         setIsMenuOpen(false);
         setIsNotificationsOpen(false);
       }
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  const refreshInviteCount = async () => {
+    if (!token) return;
+    const invites = await getInvitationsCount(token);
+    const notifications = await getNotificationsCount(token);
+    setInviteCount(invites.count + notifications.count);
+  };
 
-  const token = localStorage.getItem('token');
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
+  const handleLogoClick = () => {
+    navigate("/dashboard");
+  };
   return (
     <header className="header">
-      {/* THEME */}
-      <button onClick={toggleTheme}>
-        {theme === 'light' ? '🌙' : '☀️'}
-      </button>
-
-      {/* LOGO */}
-      <div
-        className="header__left"
-        onClick={handleLogoClick}
-        style={{ cursor: 'pointer' }}
-      >
+      <button onClick={toggleTheme}>{theme === "light" ? "🌙" : "☀️"}</button>
+      <div className="header__left" onClick={handleLogoClick}>
         <SiTrello className="header__logo" />
         <span className="header__logo-text">Trello</span>
       </div>
-
-      {/* SEARCH */}
       <div className="header__center">
-        <input
-          type="text"
-          placeholder="Пошук..."
-          className="header__search"
-        />
+        <input type="text" placeholder="Пошук..." className="header__search" />
       </div>
-
-      {/* RIGHT */}
       <div className="header__right">
-        {/* NOTIFICATIONS */}
         <div className="notification-container" ref={bellRef}>
           <FaBell
             className="header__icon"
-            onClick={toggleNotifications}
+            onClick={() => setIsNotificationsOpen((prev) => !prev)}
           />
+          {inviteCount > 0 && (
+            <span className="notification-badge">{inviteCount}</span>
+          )}
           {isNotificationsOpen && (
             <div className="notifications-dropdown">
-              <InvitationsPanel token={token} />
+              <InvitationsPanel
+                token={token}
+                onUpdateCount={refreshInviteCount}
+              />
             </div>
           )}
         </div>
-
-        {/* USER MENU */}
         <div className="user-menu" ref={menuRef}>
           <FaUserCircle
             className="header__icon"
-            onClick={toggleMenu}
+            onClick={() => setIsMenuOpen((prev) => !prev)}
           />
-
           {isMenuOpen && (
             <div className="dropdown-menu">
               <div className="user-info">
                 <strong>{user?.username}</strong>
               </div>
-
-              <button onClick={handleLogout}>
-                Вийти
-              </button>
+              <button onClick={handleLogout}>Вийти</button>
             </div>
           )}
         </div>

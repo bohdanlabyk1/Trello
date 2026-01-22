@@ -1,7 +1,14 @@
-// src/invitation/invitation.controller.ts
-import { Controller, Post, Get, Body, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { InvitationService } from './invitation.service';
-import { JwtAuthGuard } from './../auth-user/jwt-auth';
+import { JwtAuthGuard } from '../auth-user/jwt-auth';
 
 @Controller('invitations')
 @UseGuards(JwtAuthGuard)
@@ -16,6 +23,11 @@ export class InvitationController {
   @Get()
   getMyInvitations(@Req() req) {
     return this.service.getUserInvitations(req.user.id);
+  }
+
+  @Get('count')
+  getCount(@Req() req) {
+    return this.service.getPendingCount(req.user.id);
   }
 
   @Post(':id/respond')

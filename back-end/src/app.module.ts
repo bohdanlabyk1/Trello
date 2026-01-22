@@ -8,6 +8,7 @@ import { ComentsModule } from './coments/coments.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { SprintModule } from './sprint/sprint.module';
 import { ActivityModule } from './actyviti/actyviti.module';
+import { NotificationModule } from './invitation/notifikation.module';
 
 
 
@@ -22,6 +23,8 @@ import { ActivityModule } from './actyviti/actyviti.module';
     InvitationModule,
     SprintModule,
     ActivityModule,
+    NotificationModule,
+
    ],
 })
 export class AppModule {}

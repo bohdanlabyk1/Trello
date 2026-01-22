@@ -154,10 +154,26 @@ clearActivityLogs: async (projectId) => {
           };
         }),
 
-      moveTask: async (fromCol, taskId, toCol, order) => {
-        const { token } = get();
-        await api.moveTask(token, fromCol, taskId, toCol, order);
-      },
+  moveTask: async (fromCol, taskId, toCol, order) => {
+  const { token, tasks } = get();
+
+  await api.moveTask(token, fromCol, taskId, toCol, order);
+
+  const task = tasks[fromCol].find(t => t.id === taskId);
+
+  set({
+    tasks: {
+      ...tasks,
+      [fromCol]: tasks[fromCol].filter(t => t.id !== taskId),
+      [toCol]: [
+        ...(tasks[toCol] || []),
+        { ...task, columnId: toCol },
+      ],
+    },
+  });
+},
+
+
     }),
     {
       name: 'project-store',

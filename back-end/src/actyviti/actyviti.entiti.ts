@@ -1,28 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column,CreateDateColumn } from 'typeorm';
+import { Entity,PrimaryGeneratedColumn, Column,CreateDateColumn, ManyToOne, RelationId} from 'typeorm';
+import { Auth } from '../auth-user/auth-user.entiti';
+import { Project } from '../progect/project.entiti';
 
 @Entity('activity_logs')
 export class ActivityLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  projectId: number;
+  @ManyToOne(() => Auth, auth => auth.activityLogs, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  user: Auth;
 
-  @Column()
-  userId: number;
+  @ManyToOne(() => Project, {
+    onDelete: 'CASCADE',
+  })
+  project: Project;
 
   @Column()
   action: string;
-  /*
-    CREATE_TASK
-    CHANGE_STATUS
-    MOVE_TASK
-    MOVE_COLUMN
-    ADD_MEMBER
-  */
+
+  @RelationId((log: ActivityLog) => log.project)
+projectId: number;
 
   @Column({ nullable: true })
-  entityType: string; // task | column | project | user
+  entityType: string;
 
   @Column({ nullable: true })
   entityId: number;

@@ -1,4 +1,3 @@
-// src/invitation/invitation.entity.ts
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
 import { Auth } from './../auth-user/auth-user.entiti';
 import { Project } from './../progect/project.entiti';

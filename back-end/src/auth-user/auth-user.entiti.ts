@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
 import { Project } from "./../progect/project.entiti";
+import { Notification } from './../invitation/noification.entiti';
 import { Invitation } from "src/invitation/invitation.entiti";
+import {ActivityLog} from './../actyviti/actyviti.entiti'
 
 @Entity('auths')
 export class Auth {
@@ -16,17 +18,22 @@ export class Auth {
   @Column()
   password: string;
 
-  // 🔹 Проекти, створені користувачем (він власник)
   @OneToMany(() => Project, (project) => project.owner)
   ownedProjects: Project[];
 
-  // 🔹 Проекти, в яких користувач є учасником
   @ManyToMany(() => Project, (project) => project.members)
   projects: Project[];
 
   @OneToMany(() => Invitation, (inv) => inv.sender)
 sentInvitations: Invitation[];
 
+@OneToMany(() => Notification, (n) => n.user)
+notifications: Notification[];
+
 @OneToMany(() => Invitation, (inv) => inv.recipient)
 receivedInvitations: Invitation[];
+
+@OneToMany(() => ActivityLog, (activity: ActivityLog) => activity.user)
+activityLogs: ActivityLog[];
+
 }

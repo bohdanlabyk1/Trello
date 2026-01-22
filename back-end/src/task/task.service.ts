@@ -86,7 +86,7 @@ if (dto.status !== undefined) {
 
 if (dto.status !== undefined && oldStatus !== dto.status) {
   await this.activityService.log({
-    projectId: task.column.project.id,
+  projectId: task.column.project.id ,
     userId,
     action: 'CHANGE_STATUS',
     entityType: 'task',
@@ -132,8 +132,8 @@ if (dto.status !== undefined && oldStatus !== dto.status) {
   const savedTask = await this.taskRepo.save(task);
 
   await this.activityService.log({
-    projectId: column.project.id,
-    userId,
+    projectId: task.column.project.id,
+   userId,
     action: 'CREATE_TASK',
     entityType: 'task',
     entityId: savedTask.id,
@@ -157,7 +157,7 @@ if (dto.status !== undefined && oldStatus !== dto.status) {
 
     if (!hasAccess) throw new ForbiddenException('Access denied');
 await this.activityService.log({
-  projectId: task.column.project.id,
+ projectId: task.column.project.id ,
   userId,
   action: 'DELETE_TASK',
   entityType: 'task',
@@ -210,6 +210,14 @@ async moveTask(
 
   if (!targetColumn) throw new NotFoundException('Target column not found');
 
+  if (targetColumn.title === 'Done') {
+    task.status = 'done';
+  } else if (targetColumn.title === 'In Progress') {
+    task.status = 'in-progress';
+  } else {
+    task.status = 'todo';
+  }
+
   const hasTargetAccess =
     targetColumn.project.owner.id === userId ||
     targetColumn.project.members.some(m => m.id === userId);
@@ -243,8 +251,8 @@ async moveTask(
   }));
   
 await this.activityService.log({
-  projectId: task.column.project.id,
-  userId,
+  projectId: task.column.project.id ,
+   userId,
   action: 'MOVE_TASK',
   entityType: 'task',
   entityId: task.id,

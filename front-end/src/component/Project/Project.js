@@ -75,14 +75,14 @@ const Project = ({ ismodal, setIsmodal }) => {
 
   return (
     <div className="projects">
-      <h2>Мої проекти</h2>
+      <h2>Панель керування проєктами</h2>
 
       <div className="projects-list">
         <button
       className="create-project-btn"
       onClick={() => setIsmodal(true)}
     >
-      + Створити проект
+       Створити проект
     </button>
         {projects.map(project => (
           <div key={project.id} className="project-card">
@@ -96,7 +96,7 @@ const Project = ({ ismodal, setIsmodal }) => {
             <p>{project.description}</p>
 
             <button onClick={() => handleDeleteProject(project.id)}>
-              Видалити
+             Видалити проєкт
             </button>
           </div>
         ))}

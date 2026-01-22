@@ -22,6 +22,24 @@ export class AuthUserService {
         if (existUser) {
             throw new HttpException('Користувач з таким email вже існує', HttpStatus.BAD_REQUEST);
         }
+        const usernameRegex = /^[a-z0-9]{4,}$/;
+        const passwordRegex =
+       /^(?=.*[a-z])(?=.*[A-Z]).{5,}$/
+
+
+        if (!usernameRegex.test(username)) {
+        throw new HttpException(
+            'Username must be at least 4 characters long and contain only lowercase letters and numbers',
+            HttpStatus.BAD_REQUEST
+        );
+        }
+
+        if (!passwordRegex.test(password)) {
+        throw new HttpException(
+            'Пароль має містити щонайменше 5 символів та містити великі, малі літери ',
+            HttpStatus.BAD_REQUEST
+        );
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 

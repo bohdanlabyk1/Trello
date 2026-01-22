@@ -8,6 +8,7 @@ import { Task } from 'src/task/task.entity';
 import { Invitation } from 'src/invitation/invitation.entiti';
 import { Sprint } from 'src/sprint/sprint.entity';
 import { ActivityLog } from '../actyviti/actyviti.entiti';
+import { Notification } from 'src/invitation/noification.entiti';
 
 @Module({
   imports: [
@@ -20,9 +21,9 @@ import { ActivityLog } from '../actyviti/actyviti.entiti';
       database: 'trello',
       autoLoadEntities: true,
       synchronize: true,
-      entities: [Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog], 
+      entities: [Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog, Notification], 
     }),
-    TypeOrmModule.forFeature([Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog]),
+    TypeOrmModule.forFeature([Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog, Notification]),
   ],
 })
 export class DatabaseModule {}
