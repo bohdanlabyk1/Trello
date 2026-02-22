@@ -5,6 +5,7 @@ import UsersPanel from './../User/userpanel';
 import Board from './../boards/board';
 import Sprint from './sprint';
 import './../style/style.css';
+import UsersList from '../User/UserList';
 import Analytics from '../analytics/Analytics';
 import ActivityLog from './../activyti/Activyti';
 
@@ -12,8 +13,7 @@ const Dashboard = () => {
   const { id } = useParams();
   const [project, setProject] = useState(null);
   const [activeTab, setActiveTab] = useState('board');
-  const [isUsersModalOpen, setIsUsersModalOpen] = useState(false);
-
+  
   useEffect(() => {
     const fetchProject = async () => {
       try {
@@ -48,8 +48,8 @@ const Dashboard = () => {
             🚀 Спринт
           </li>
           <li
-            className="menu-item users-button"
-            onClick={() => setIsUsersModalOpen(true)}
+             className={`menu-item ${activeTab === 'users' ? 'active' : ''}`}
+              onClick={() => setActiveTab('users')}
           >
             👥 Користувачі
           </li>
@@ -72,18 +72,14 @@ const Dashboard = () => {
         {activeTab === 'board' && <Board projectId={project.id} />}
         {activeTab === 'sprint' && <Sprint projectId={project.id} />}
         {activeTab === 'analytics' && <Analytics />}
+        {activeTab === 'users' && (
+          <UsersList token={localStorage.getItem('token')}
+          projectId={project.id}/>
+)}
         {activeTab === 'activity' && <ActivityLog projectId={project.id} />}
 
 
       </div>
-
-      {isUsersModalOpen && (
-        <UsersPanel
-          token={localStorage.getItem('token')}
-          projectId={project.id}
-          onClose={() => setIsUsersModalOpen(false)}
-        />
-      )}
     </div>
   );
 };

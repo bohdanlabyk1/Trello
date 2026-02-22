@@ -1,0 +1,122 @@
+/* Dropdown контейнер */
+.notifications-dropdown {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+/* Панель */
+.notifications-panel {
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  padding: 10px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Заголовок */
+.panel-title {
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Item */
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: #f6f7fb;
+  transition: 0.2s;
+  font-size: 14px;
+}
+
+/* Hover */
+.notification-item:hover {
+  background: #e9ecf5;
+  transform: translateY(-1px);
+  cursor: pointer;
+}
+
+/* Actions */
+.actions button {
+  border: none;
+  padding: 4px 8px;
+  margin-left: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Accept */
+.actions .accept {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* Reject */
+.actions .reject {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Status */
+.status {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.status.pending {
+  color: #e6a700;
+}
+
+.status.accepted {
+  color: #2e7d32;
+}
+
+.status.rejected {
+  color: #c62828;
+}
+
+/* Empty */
+.empty-text {
+  text-align: center;
+  padding: 30px 10px;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Scroll */
+.notifications-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notifications-panel::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

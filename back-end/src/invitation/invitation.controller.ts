@@ -6,6 +6,7 @@ import {
   Param,
   Req,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { InvitationService } from './invitation.service';
 import { JwtAuthGuard } from '../auth-user/jwt-auth';
@@ -19,6 +20,12 @@ export class InvitationController {
   invite(@Req() req, @Body() body: { email: string; projectId: number }) {
     return this.service.inviteUser(req.user.id, body.email, body.projectId);
   }
+
+  @Get('sent')
+getSent(@Req() req) {
+  return this.service.getSentInvitations(req.user.id);
+}
+
 
   @Get()
   getMyInvitations(@Req() req) {
@@ -38,4 +45,15 @@ export class InvitationController {
   ) {
     return this.service.respondToInvitation(id, req.user.id, body.accept);
   }
+  @Patch(':id/read')
+markAsRead(
+  @Param('id') id: number,
+  @Req() req,
+) {
+  return this.service.markAsRead(
+    id,
+    req.user.id,
+  );
+}
+
 }

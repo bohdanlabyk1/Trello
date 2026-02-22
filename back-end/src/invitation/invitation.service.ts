@@ -1,5 +1,4 @@
-// src/invitation/invitation.service.ts
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable,NotFoundException,BadRequestException,} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invitation } from './invitation.entiti';
@@ -10,78 +9,259 @@ import { Project } from 'src/progect/project.entiti';
 @Injectable()
 export class InvitationService {
   constructor(
-    @InjectRepository(Invitation) private repo: Repository<Invitation>,
-    @InjectRepository(Auth) private users: Repository<Auth>,
-    @InjectRepository(Project) private projects: Repository<Project>,
+    @InjectRepository(Invitation)
+    private repo: Repository<Invitation>,
+
+    @InjectRepository(Auth)
+    private users: Repository<Auth>,
+
+    @InjectRepository(Project)
+    private projects: Repository<Project>,
+
     @InjectRepository(Notification)
     private notificationsRepo: Repository<Notification>,
   ) {}
+async markAsRead(
+  inviteId: number,
+  userId: number,
+) {
+  const invite = await this.repo.findOne({
+    where: { id: inviteId },
+    relations: ['recipient', 'sender'],
+  });
 
-  async inviteUser(senderId: number, recipientEmail: string, projectId: number) {
-    const sender = await this.users.findOneBy({ id: senderId });
-    const recipient = await this.users.findOneBy({ email: recipientEmail });
-    const project = await this.projects.findOneBy({ id: projectId });
+  if (!invite)
+    throw new NotFoundException(
+      'Запрошення не знайдене',
+    );
 
-    if (!recipient) throw new NotFoundException('Користувач не знайдений');
-    if (!project) throw new NotFoundException('Проєкт не знайдений');
+  const isRecipient =
+    invite.recipient.id === userId;
+
+  const isSender =
+    invite.sender.id === userId;
+
+  if (!isRecipient && !isSender)
+    throw new BadRequestException(
+      'Це не ваше запрошення',
+    );
+
+  invite.isRead = true;
+
+  await this.repo.save(invite);
+
+  return {
+    message: 'Позначено як прочитане',
+  };
+}
+
+ 
+  async inviteUser(
+    senderId: number,
+    recipientEmail: string,
+    projectId: number,
+  ) {
+  
+    const sender = await this.users.findOneBy({
+      id: senderId,
+    });
+
+    const recipient = await this.users.findOneBy({
+      email: recipientEmail,
+    });
+
+    const project = await this.projects.findOne({
+      where: { id: projectId },
+      relations: ['members'],
+    });
+
+  
+    if (!sender)
+      throw new NotFoundException(
+        'Відправник не знайдений',
+      );
+
+    if (!recipient)
+      throw new NotFoundException(
+        'Користувач не знайдений',
+      );
+
+    if (!project)
+      throw new NotFoundException(
+        'Проєкт не знайдений',
+      );
+
+    
+    if (sender.id === recipient.id) {
+      throw new BadRequestException(
+        'Не можна запросити себе',
+      );
+    }
+
+    const alreadyMember =
+      project.members.some(
+        (u) => u.id === recipient.id,
+      );
+
+    if (alreadyMember) {
+      throw new BadRequestException(
+        'Користувач вже в проєкті',
+      );
+    }
 
     const existing = await this.repo.findOne({
-      where: { recipient, project, status: 'pending' },
+      where: {
+        recipient: { id: recipient.id },
+        project: { id: project.id },
+        status: 'pending',
+      },
     });
 
     if (existing) {
-      throw new BadRequestException('Запрошення вже відправлено');
+      throw new BadRequestException(
+        'Запрошення вже відправлено',
+      );
     }
 
-    const invitation = this.repo.create({ sender, recipient, project });
-    return this.repo.save(invitation);
+    const invitation = this.repo.create({
+      sender,
+      recipient,
+      project,
+      status: 'pending',
+    });
+
+    const saved = await this.repo.save(
+      invitation,
+    );
+
+    await this.notificationsRepo.save(
+      this.notificationsRepo.create({
+        user: recipient,
+        message: `${sender.username} запросив вас до проєкту "${project.name}"`,
+      }),
+    );
+
+    return saved;
   }
 
-  async getUserInvitations(userId: number) {
+  async getSentInvitations(
+    userId: number,
+  ) {
     return this.repo.find({
-      where: { recipient: { id: userId }, status: 'pending' },
-      relations: ['sender', 'project'],
-      order: { createdAt: 'DESC' },
+      where: {
+        sender: { id: userId },
+         isRead: false,
+      },
+      relations: [
+        'recipient',
+        'project',
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 
-  async respondToInvitation(inviteId: number, userId: number, accept: boolean) {
-    const invite = await this.repo.findOne({
-      where: { id: inviteId },
-      relations: ['recipient', 'sender', 'project'],
+  async getUserInvitations(
+    userId: number,
+  ) {
+    return this.repo.find({
+      where: {
+        recipient: { id: userId },
+        status: 'pending',
+        isRead: false
+      },
+      relations: [
+        'sender',
+        'project',
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
     });
+  }
 
-    if (!invite) throw new NotFoundException('Запрошення не знайдене');
+  async respondToInvitation(
+    inviteId: number,
+    userId: number,
+    accept: boolean,
+  ) {
+    const invite =
+      await this.repo.findOne({
+        where: { id: inviteId },
+        relations: [
+          'recipient',
+          'sender',
+          'project',
+        ],
+      });
+
+    if (!invite)
+      throw new NotFoundException(
+        'Запрошення не знайдене',
+      );
+
     if (invite.recipient.id !== userId)
-      throw new BadRequestException('Це не ваше запрошення');
+      throw new BadRequestException(
+        'Це не ваше запрошення',
+      );
 
     if (accept) {
       invite.status = 'accepted';
+      invite.isRead = true;
 
-      const project = await this.projects.findOne({
-        where: { id: invite.project.id },
-        relations: ['members', 'owner'],
-      });
+      const project =
+        await this.projects.findOne({
+          where: {
+            id: invite.project.id,
+          },
+          relations: [
+            'members',
+          ],
+        });
 
-      if (!project.members.some(u => u.id === invite.recipient.id)) {
-        project.members.push(invite.recipient);
-        await this.projects.save(project);
+      if (!project)
+        throw new NotFoundException(
+          'Проєкт не знайдений',
+        );
+
+      const alreadyMember =
+        project.members.some(
+          (u) =>
+            u.id ===
+            invite.recipient.id,
+        );
+
+      if (!alreadyMember) {
+        project.members.push(
+          invite.recipient,
+        );
+        await this.projects.save(
+          project,
+        );
       }
 
       await this.notificationsRepo.save(
-        this.notificationsRepo.create({
-          user: project.owner,
-          message: `${invite.recipient.username} прийняв запрошення до проєкту "${project.name}"`,
-        }),
+        this.notificationsRepo.create(
+          {
+            user: invite.sender,
+            message: `${invite.recipient.username} прийняв запрошення до проєкту "${project.name}"`,
+          },
+        ),
       );
-    } else {
+    }
+
+    else {
       invite.status = 'rejected';
+      invite.isRead = true;
 
       await this.notificationsRepo.save(
-        this.notificationsRepo.create({
-          user: invite.sender,
-          message: `${invite.recipient.username} відхилив запрошення до проєкту "${invite.project.name}"`,
-        }),
+        this.notificationsRepo.create(
+          {
+            user: invite.sender,
+            message: `${invite.recipient.username} відхилив запрошення до проєкту "${invite.project.name}"`,
+          },
+        ),
       );
     }
 
@@ -90,13 +270,19 @@ export class InvitationService {
     return invite;
   }
 
-  async getPendingCount(userId: number) {
-    const count = await this.repo.count({
-      where: {
-        recipient: { id: userId },
-        status: 'pending',
-      },
-    });
+  async getPendingCount(
+    userId: number,
+  ) {
+    const count =
+      await this.repo.count({
+        where: {
+          recipient: {
+            id: userId,
+          },
+          status: 'pending',
+          isRead: false
+        },
+      });
 
     return { count };
   }

@@ -102,48 +102,59 @@ const Task = ({ task, columnId }) => {
         </span>
       </div>
 
-      {menuOpen && (
-        <div ref={menuRef} className="task-menu">
-          <div
-            className="task-menu-item"
-            onClick={() => setShowComments(prev => !prev)}
-          >
-            💬 {showComments ? 'Hide comments' : 'Show comments'}
-          </div>
+     {menuOpen && (
+  <div className="task-menu-overlay">
+    <div ref={menuRef} className="task-menu">
 
-          <div className="task-menu-item label-selector">
-            🎨 Change label:
-            {labelColors.map(color => (
-              <span
-                key={color}
-                className={`task-label-dot ${color}`}
-                style={{
-                  marginLeft: 6,
-                  cursor: 'pointer',
-                  border: label === color ? '2px solid black' : ''
-                }}
-                onClick={() => handleChangeLabel(color)}
-              />
-            ))}
-            <span
-              style={{
-                marginLeft: 6,
-                cursor: 'pointer',
-                padding: '0 4px',
-                border: '1px dashed #6b778c',
-                borderRadius: '50%'
-              }}
-              onClick={() => handleChangeLabel('')}
-            >
-              ×
-            </span>
-          </div>
+      <div className="task-menu-header">
+        <span>Task actions</span>
+        <button onClick={() => setMenuOpen(false)}>✕</button>
+      </div>
 
-          <div className="task-menu-item delete" onClick={handleDelete}>
-            🗑 Delete task
-          </div>
+      <div className="task-menu-section">
+
+        <div
+          className="task-menu-item"
+          onClick={() => setShowComments(prev => !prev)}
+        >
+          💬 Comments
         </div>
-      )}
+
+        <div className="task-menu-item">
+          👤 Members
+        </div>
+
+        <div className="task-menu-item">
+          📅 Dates
+        </div>
+
+      </div>
+
+    <div className="task-menu-section">
+  <div className="color-picker">
+    {labelColors.map(color => (
+      <span
+        key={color}
+        className={`color-circle ${color} ${label === color ? 'active' : ''}`}
+        onClick={() => handleChangeLabel(color)}
+      />
+    ))}
+  </div>
+</div>
+
+      <div className="task-menu-section danger">
+        <div
+          className="task-menu-item delete"
+          onClick={handleDelete}
+        >
+          🗑 Delete task
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
+
 
       {showComments && (
         <CommentList

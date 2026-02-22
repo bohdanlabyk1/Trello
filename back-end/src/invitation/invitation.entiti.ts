@@ -10,6 +10,9 @@ export class Invitation {
   @ManyToOne(() => Auth, (user) => user.sentInvitations, { onDelete: 'CASCADE' })
   sender: Auth; // хто запрошує
 
+  @Column({ default: false })
+  isRead: boolean;
+  
   @ManyToOne(() => Auth, (user) => user.receivedInvitations, { onDelete: 'CASCADE' })
   recipient: Auth; // кого запрошують
 

@@ -1,5 +1,25 @@
+
+:root {
+  --bg: #f4f6fa;
+  --text: #1f2937;
+  --card: #ffffff;
+   --red: #eb4a4a; 
+  --border: #d1d5db;
+  --muted: #6b7280;
+  --primary: #3366ff;
+}
+
+body[data-theme="dark"] {
+  --bg: #020617;
+  --text: #e5e7eb;
+  --card: #0f172a;
+  --border: #3f3f46;
+  --muted: #9ca3af;
+  --primary: #60a5fa;
+}
+
 .activity-log {
-  background: #ffffff;
+  background: var(--bg);
   padding: 16px;
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
@@ -17,7 +37,7 @@
 }
 
 .clear-log-btn {
-  background: #ef4444;
+  background:var(--red);
   color: white;
   border: none;
   padding: 6px 10px;
@@ -26,7 +46,7 @@
 }
 
 .clear-log-btn:hover {
-  background: #dc2626;
+  background: var(--red);
 }
 
 .empty-log {
@@ -44,7 +64,7 @@
 }
 
 .log-item:hover {
-  background: #f1f5f9;
+  background:var(--bg);
 }
 
 .icon {

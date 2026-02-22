@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Comment } from './../coments/coment.entity';
+import { Comment } from './coment.entity';
 import { Task } from 'src/task/task.entity';
 
 @Injectable()
@@ -32,8 +32,14 @@ export class CommentsService {
   }
 
   async findByTask(taskId: number) {
-    return this.commentRepo.find({
-      where: { task: { id: taskId } },
-    });
+  if (!taskId || isNaN(taskId)) {
+    throw new NotFoundException('Invalid taskId');
   }
+
+  return this.commentRepo.find({
+    where: { task: { id: taskId } },
+  });
+}
+
+
 }

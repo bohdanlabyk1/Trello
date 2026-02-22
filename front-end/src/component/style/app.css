@@ -5,18 +5,35 @@
   --border: #ddd;
 }
 
-body[data-theme='dark'] {
+body[data-theme="light"] {
+  --bg: #f4f6fa;
+  --text: #222;
+  --card: #ffffff;
+  --border: #ddd;
+}
+
+body[data-theme="dark"] {
   --bg: #1e1f25;
   --text: #e5e7eb;
   --card: #2a2b32;
   --border: #3f3f46;
 }
 
+/* ===== GLOBAL ===== */
+
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--text);
+  font-family: Inter, sans-serif;
+  transition: 0.3s;
 }
-.column, .task {
+
+
+
+.column,
+.task,
+.header {
   background: var(--card);
   border: 1px solid var(--border);
 }

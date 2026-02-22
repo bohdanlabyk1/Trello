@@ -26,8 +26,24 @@ const fetchData = async (endpoint, options = {}) => {
     );
   }
 
-  return response.json();
+  return response.json()
+
 };
+
+export const markInvitationRead = (
+  token,id
+) =>
+  fetchData(`/invitations/${id}/read`, {
+    method: "PATCH",
+    token,
+  });
+
+export const getSentInvitations = (token) =>
+  fetchData("/invitations/sent", {
+    method: "GET",
+    token,
+  });
+
 // ===== AUTH =====
 export const loginUser = (email, password) =>
   fetchData("/auth-user/login", {

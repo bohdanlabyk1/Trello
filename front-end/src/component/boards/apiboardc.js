@@ -10,9 +10,17 @@ export const useProjectStore = create(
         localStorage.setItem('token', token);
         set({ token });
       },
+      
 setUser: (user) => {
     set({ user });
   },
+theme: "light",
+    
+ comments: {},
+toggleTheme: () =>
+  set((state) => ({
+    theme: state.theme === "light" ? "dark" : "light",
+  })),
 
   logout: () => {
     localStorage.removeItem('token');
@@ -59,6 +67,22 @@ activityLogs: [],
           tasks,
         });
       },
+        
+ loadComments: async (taskId) => {
+  const { token } = get();
+
+  if (!taskId) return; 
+
+  const data = await api.getCommentsByTask(token, taskId);
+
+  set((state) => ({
+    comments: {
+      ...state.comments,
+      [taskId]: data,
+    },
+  }));
+},
+
 updateColumnColor: async (columnId, color) => {
   const { token, columns } = get();
 
@@ -69,7 +93,14 @@ updateColumnColor: async (columnId, color) => {
       col.id === columnId ? { ...col, color: updated.color } : col
     ),
   });
-},
+},  searchQuery: '',
+      searchType: 'task',
+
+      setSearchQuery: (q) => set({ searchQuery: q }),
+      setSearchType: (t) => set({ searchType: t }),
+    
+      
+
 clearActivityLogs: async (projectId) => {
   const { token } = get();
   await api.clearActivityLogs(token, projectId);
@@ -175,9 +206,14 @@ clearActivityLogs: async (projectId) => {
 
 
     }),
+     
     {
       name: 'project-store',
-      partialize: state => ({ token: state.token }),
+      partialize: state => ({
+         token: state.token,
+           user: state.user,
+          theme: state.theme,
+          }),
     }
   )
 );

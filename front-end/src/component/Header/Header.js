@@ -3,9 +3,10 @@ import "./../style/header.css";
 import { FaBell, FaUserCircle } from "react-icons/fa";
 import { SiTrello } from "react-icons/si";
 import { useNavigate } from "react-router-dom";
-import InvitationsPanel from "../User/invitation";
+
+import AllNotificationsPanel from "./../User/aliert";
 import { useProjectStore } from "./../boards/apiboardc";
-import { getInvitationsCount, getNotificationsCount } from "../api/api";
+import HeaderSearch from "../Sreach/Sreach";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -23,23 +24,7 @@ const Header = () => {
   const user = useProjectStore((state) => state.user);
   const logout = useProjectStore((state) => state.logout);
 
-  useEffect(() => {
-    if (!token) return;
-
-    const loadCounts = async () => {
-      try {
-        const invites = await getInvitationsCount(token);
-        const notifications = await getNotificationsCount(token);
-
-        setInviteCount(invites.count + notifications.count);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    loadCounts();
-  }, [token]);
-
+  // 🔹 Закриття меню по кліку поза ним
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -55,12 +40,6 @@ const Header = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const refreshInviteCount = async () => {
-    if (!token) return;
-    const invites = await getInvitationsCount(token);
-    const notifications = await getNotificationsCount(token);
-    setInviteCount(invites.count + notifications.count);
-  };
 
   const handleLogout = () => {
     logout();
@@ -70,34 +49,47 @@ const Header = () => {
   const handleLogoClick = () => {
     navigate("/dashboard");
   };
+
+  // 🔹 Функція для оновлення лічильника з дочірнього компонента
+  const updateInviteCount = (count) => {
+    setInviteCount(count);
+  };
+
   return (
     <header className="header">
+      {/* Тема */}
       <button onClick={toggleTheme}>{theme === "light" ? "🌙" : "☀️"}</button>
+
+      {/* Логотип */}
       <div className="header__left" onClick={handleLogoClick}>
         <SiTrello className="header__logo" />
         <span className="header__logo-text">Trello</span>
       </div>
+
+      {/* Пошук */}
       <div className="header__center">
-        <input type="text" placeholder="Пошук..." className="header__search" />
+        <HeaderSearch />
       </div>
+
+      {/* Правий блок */}
       <div className="header__right">
+        {/* 🔔 Notifications */}
         <div className="notification-container" ref={bellRef}>
           <FaBell
             className="header__icon"
             onClick={() => setIsNotificationsOpen((prev) => !prev)}
           />
-          {inviteCount > 0 && (
-            <span className="notification-badge">{inviteCount}</span>
-          )}
+
+          {inviteCount > 0 && <span className="notification-badge">{inviteCount}</span>}
+
           {isNotificationsOpen && (
             <div className="notifications-dropdown">
-              <InvitationsPanel
-                token={token}
-                onUpdateCount={refreshInviteCount}
-              />
+              <AllNotificationsPanel token={token} onUpdateCount={updateInviteCount} />
             </div>
           )}
         </div>
+
+        {/* 👤 User */}
         <div className="user-menu" ref={menuRef}>
           <FaUserCircle
             className="header__icon"

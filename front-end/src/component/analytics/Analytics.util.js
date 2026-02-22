@@ -1,6 +1,4 @@
-// analytics.utils.js
 
-// 1️⃣ Кількість задач у кожній колонці
 export const tasksPerColumn = (columns, tasks) => {
   return columns.map(col => ({
     columnId: col.id,
@@ -9,7 +7,6 @@ export const tasksPerColumn = (columns, tasks) => {
   }));
 };
 
-// 2️⃣ Скільки задач виконав кожний користувач
 export const tasksPerUser = (tasks) => {
   const result = {};
 
@@ -23,7 +20,6 @@ export const tasksPerUser = (tasks) => {
   return result;
 };
 
-// 3️⃣ Середній час завершення задачі (в годинах)
 export const averageTaskCompletionTime = (tasks) => {
   const doneTasks = Object.values(tasks)
     .flat()
@@ -40,7 +36,6 @@ export const averageTaskCompletionTime = (tasks) => {
   return Math.round(totalTime / doneTasks.length / 1000 / 60 / 60);
 };
 
-// 4️⃣ Продуктивність по спринтах
 export const sprintProductivity = (sprints, tasks) => {
   return sprints.map(sprint => {
     const sprintTasks = Object.values(tasks)

@@ -1,18 +1,29 @@
-/* ===== ROOT ===== */
+:root {
+  --bg: #f4f6fa;
+  --text: #1f2937;
+  --card: #ffffff;
+  --border: #d1d5db;
+  --muted: #111111;
+  --primary: #3366ff;
+}
 .analytics {
   padding: 24px;
-  background: var(--bg, #f8fafc);
-  color: var(--text, #0f172a);
+  background: var(--bg, );
+  color: var(--text);
   animation: fadeIn 0.3s ease-in;
+   height: 89%;    
+  display: flex;
+  flex-direction: column;
+  overflow-x: auto;
 }
 
-/* ===== TITLES ===== */
 .analytics h2 {
   font-size: 28px;
   margin-bottom: 24px;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #000;
 }
 
 .analytics h3 {
@@ -21,7 +32,6 @@
   color: #334155;
 }
 
-/* ===== KPI CARDS ===== */
 .analytics-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -47,9 +57,9 @@
   color: #2563eb;
 }
 
-/* ===== CHART BLOCK ===== */
+
 .analytics .recharts-responsive-container {
-  background: #ffffff;
+  background:var(--bg);
   border-radius: 16px;
   padding: 16px 8px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.06);
@@ -66,7 +76,7 @@
 }
 
 .analytics ul li {
-  background: #ffffff;
+  background: var(--text);
   padding: 12px 16px;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.06);
@@ -79,28 +89,26 @@
   content: "👤";
 }
 
-/* ===== DARK THEME ===== */
 body[data-theme="dark"] .analytics {
-  background: #020617;
-  color: #e5e7eb;
+  background:var(--text);
+  color: var(--text);
 }
 
 body[data-theme="dark"] .analytics .card,
 body[data-theme="dark"] .analytics .recharts-responsive-container,
 body[data-theme="dark"] .analytics ul li {
-  background: #0f172a;
+  background: var(--muted);
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
 body[data-theme="dark"] .analytics h3 {
-  color: #cbd5f5;
+  color: var(--muted);
 }
 
 body[data-theme="dark"] .analytics .card b {
-  color: #60a5fa;
+  color: var(--muted);
 }
 
-/* ===== ANIMATIONS ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;
