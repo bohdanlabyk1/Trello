@@ -102,7 +102,6 @@ body[data-theme='dark'] {
   text-decoration: underline;
 }
 
-/* ===== DESCRIPTION ===== */
 .project-card p {
   flex: 1;
   font-size: 0.95rem;
@@ -110,7 +109,6 @@ body[data-theme='dark'] {
   color: var(--muted);
 }
 
-/* ===== DELETE BUTTON ===== */
 .project-card button {
   align-self: flex-end;
   background: rgba(255, 92, 92, 0.12);
@@ -129,7 +127,6 @@ body[data-theme='dark'] {
   color: #fff;
 }
 
-/* ===== MODAL ===== */
 .modal {
   position: fixed;
   inset: 0;
@@ -150,23 +147,11 @@ body[data-theme='dark'] {
   animation: modalFade 0.25s ease;
 }
 
-@keyframes modalFade {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .modal-content h2 {
   margin-bottom: 18px;
   text-align: center;
 }
 
-/* ===== INPUTS ===== */
 .modal-content input,
 .modal-content textarea {
   width: 100%;
@@ -188,7 +173,6 @@ body[data-theme='dark'] {
   border-color: var(--primary);
 }
 
-/* ===== MODAL BUTTONS ===== */
 .modal-content button {
   width: 100%;
   padding: 12px;
@@ -207,4 +191,14 @@ body[data-theme='dark'] {
 
 .modal-content button:last-of-type {
   background: #f1f1f1;
+}
+@keyframes modalFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

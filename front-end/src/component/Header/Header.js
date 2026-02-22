@@ -15,16 +15,13 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [inviteCount, setInviteCount] = useState(0);
-
   const menuRef = useRef(null);
   const bellRef = useRef(null);
-
   const toggleTheme = useProjectStore((state) => state.toggleTheme);
   const theme = useProjectStore((state) => state.theme);
   const user = useProjectStore((state) => state.user);
   const logout = useProjectStore((state) => state.logout);
 
-  // 🔹 Закриття меню по кліку поза ним
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -50,30 +47,25 @@ const Header = () => {
     navigate("/dashboard");
   };
 
-  // 🔹 Функція для оновлення лічильника з дочірнього компонента
   const updateInviteCount = (count) => {
     setInviteCount(count);
   };
 
   return (
     <header className="header">
-      {/* Тема */}
       <button onClick={toggleTheme}>{theme === "light" ? "🌙" : "☀️"}</button>
 
-      {/* Логотип */}
       <div className="header__left" onClick={handleLogoClick}>
         <SiTrello className="header__logo" />
         <span className="header__logo-text">Trello</span>
       </div>
 
-      {/* Пошук */}
       <div className="header__center">
         <HeaderSearch />
       </div>
 
-      {/* Правий блок */}
       <div className="header__right">
-        {/* 🔔 Notifications */}
+       
         <div className="notification-container" ref={bellRef}>
           <FaBell
             className="header__icon"
@@ -89,7 +81,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* 👤 User */}
         <div className="user-menu" ref={menuRef}>
           <FaUserCircle
             className="header__icon"

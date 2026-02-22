@@ -22,10 +22,8 @@ const Task = ({ task, columnId }) => {
   const [showComments, setShowComments] = useState(false);
   const [label, setLabel] = useState(task.label || '');
   const [title, setTitle] = useState(task.title);
-
   const menuRef = useRef(null);
 
-  // ===== CLOSE MENU ON OUTSIDE CLICK =====
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -36,24 +34,20 @@ const Task = ({ task, columnId }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ===== LOAD COMMENTS =====
   useEffect(() => {
     if (showComments) loadComments(task.id);
   }, [showComments, task.id, loadComments]);
 
-  // ===== DELETE =====
   const handleDelete = async () => {
     await deleteTask(task.id, columnId);
     setMenuOpen(false);
   };
 
-  // ===== LABEL =====
   const handleChangeLabel = async (newLabel) => {
     setLabel(newLabel);
     await updateTask(task.id, columnId, { label: newLabel });
   };
 
-  // ===== TITLE =====
   const handleTitleBlur = async () => {
     if (!title.trim() || title === task.title) return;
 
@@ -78,7 +72,6 @@ const Task = ({ task, columnId }) => {
           <span className="task-icon">📄</span>
           <span className="task-id">{task.id}</span>
 
-          {/* ✅ EDITABLE TITLE */}
           <input
             className="task-title-input"
             value={title}

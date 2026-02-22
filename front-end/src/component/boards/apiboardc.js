@@ -40,7 +40,6 @@ activityLogs: [],
 },
       setSelectedSprintId: id => set({ selectedSprintId: id }),
 
-      // ===== LOAD PROJECT =====
       loadProjectData: async projectId => {
         const { token } = get();
         if (!token || !projectId) return;
@@ -167,7 +166,6 @@ clearActivityLogs: async (projectId) => {
         });
       },
 
-      // ===== DND =====
       moveTaskLocally: (fromCol, toCol, task, index) =>
         set(state => {
           const source = [...state.tasks[fromCol]];

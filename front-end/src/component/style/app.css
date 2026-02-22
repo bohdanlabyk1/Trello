@@ -19,8 +19,6 @@ body[data-theme="dark"] {
   --border: #3f3f46;
 }
 
-/* ===== GLOBAL ===== */
-
 body {
   margin: 0;
   background: var(--bg);
@@ -28,8 +26,6 @@ body {
   font-family: Inter, sans-serif;
   transition: 0.3s;
 }
-
-
 
 .column,
 .task,

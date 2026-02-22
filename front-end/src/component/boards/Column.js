@@ -33,7 +33,6 @@ const Column = ({ column, tasks, isDragDisabled }) => {
       className="column"
       style={{ border: `4px solid ${column.color || '#3b82f6'}` }}
     >
-      {/* ===== HEADER ===== */}
       <div className="column-header">
         <input
           className="title-input"
@@ -59,7 +58,6 @@ const Column = ({ column, tasks, isDragDisabled }) => {
         )}
       </div>
 
-      {/* ===== TASKS ===== */}
       <Droppable droppableId={String(column.id)} type="TASK">
         {(provided) => (
           <div
@@ -93,7 +91,6 @@ const Column = ({ column, tasks, isDragDisabled }) => {
         )}
       </Droppable>
 
-      {/* ===== ADD TASK ===== */}
       <div className="add-task-plus">
         {addingTask ? (
           <input

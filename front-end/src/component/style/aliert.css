@@ -44,14 +44,12 @@
   font-size: 14px;
 }
 
-/* Hover */
 .notification-item:hover {
   background: #e9ecf5;
   transform: translateY(-1px);
   cursor: pointer;
 }
 
-/* Actions */
 .actions button {
   border: none;
   padding: 4px 8px;
@@ -61,19 +59,16 @@
   font-size: 14px;
 }
 
-/* Accept */
 .actions .accept {
   background: #e8f5e9;
   color: #2e7d32;
 }
 
-/* Reject */
 .actions .reject {
   background: #ffebee;
   color: #c62828;
 }
 
-/* Status */
 .status {
   font-weight: 500;
   font-size: 13px;
@@ -91,7 +86,6 @@
   color: #c62828;
 }
 
-/* Empty */
 .empty-text {
   text-align: center;
   padding: 30px 10px;
@@ -99,7 +93,6 @@
   font-size: 14px;
 }
 
-/* Scroll */
 .notifications-panel::-webkit-scrollbar {
   width: 6px;
 }
@@ -109,7 +102,6 @@
   border-radius: 10px;
 }
 
-/* Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;

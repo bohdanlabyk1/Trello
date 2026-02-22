@@ -4,9 +4,6 @@ import Column from './Column';
 import { useDebounce } from './../Sreach/util';
 import { useProjectStore } from './apiboardc';
 
-/* ================================
-   🔎 Fuzzy Search
-================================ */
 const fuzzyMatch = (text, query) => {
   if (!text) return false;
 
@@ -37,26 +34,18 @@ const Board = ({ projectId }) => {
     moveTaskLocally,
     moveTask,
     token,
-
-    /* 🔎 SEARCH FROM STORE */
     searchQuery,
     searchType,
   } = useProjectStore();
 
   const debouncedSearch = useDebounce(searchQuery, 300);
 
-  /* ================================
-     📦 Load project
-  ================================ */
   useEffect(() => {
     if (token && projectId) {
       loadProjectData(projectId);
     }
   }, [token, projectId, loadProjectData]);
 
-  /* ================================
-     🖱 Drag & Drop
-  ================================ */
   const onDragEnd = async ({ source, destination, draggableId }) => {
     if (!destination) return;
 
@@ -71,9 +60,6 @@ const Board = ({ projectId }) => {
     await moveTask(fromCol, taskId, toCol, destination.index);
   };
 
-  /* ================================
-     🏃 Sprint normalize
-  ================================ */
   const normalizeSprintId = () => {
     if (selectedSprintId === 'all' || selectedSprintId === 'none') {
       return selectedSprintId;
@@ -83,13 +69,9 @@ const Board = ({ projectId }) => {
 
   const sprintFilter = normalizeSprintId();
 
-  /* ================================
-     🔎 FILTER LOGIC
-  ================================ */
   const filterTasks = (columnTasks) => {
     let filtered = columnTasks;
 
-    /* Sprint filter */
     if (sprintFilter !== 'all') {
       if (sprintFilter === 'none') {
         filtered = filtered.filter(t => t.sprintId == null);
@@ -98,7 +80,6 @@ const Board = ({ projectId }) => {
       }
     }
 
-    /* Search */
     if (!debouncedSearch) return filtered;
 
     return filtered.filter(task => {
@@ -124,9 +105,6 @@ const Board = ({ projectId }) => {
     });
   };
 
-  /* ================================
-     🧠 Memo columns
-  ================================ */
   const visibleColumns = useMemo(() => {
     return columns.map(col => {
       const columnTasks = tasks[col.id] || [];
@@ -144,12 +122,8 @@ const Board = ({ projectId }) => {
     searchType,
   ]);
 
-  /* ================================
-     🎨 Render
-  ================================ */
   return (
     <>
-      {/* 🏃 Sprint Filter */}
       <select
         value={selectedSprintId}
         onChange={e => setSelectedSprintId(e.target.value)}
@@ -164,7 +138,6 @@ const Board = ({ projectId }) => {
         ))}
       </select>
 
-      {/* 📋 Board */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div style={{ display: 'flex', gap: 16 }}>
           {visibleColumns.map(col => (
