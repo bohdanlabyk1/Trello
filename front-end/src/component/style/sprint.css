@@ -60,3 +60,62 @@
   margin: 0;
   color: var(--text);
 }
+/* HEADER В ОДИН РЯД */
+.sprint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ПРИБРАТИ ВІДСТУП У H3 */
+.sprint-header h3 {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* КНОПКА ... БЕЗ РАМКИ */
+.menu-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* ОБГОРТКА МЕНЮ */
+.sprint-menu {
+  position: relative;
+}
+
+/* DROPDOWN */
+.menu-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 5px;
+  z-index: 10;
+  min-width: 150px;
+}
+
+/* КНОПКА ВСЕРЕДИНІ */
+.menu-dropdown button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px;
+  cursor: pointer;
+}
+
+/* HOVER */
+.menu-dropdown button:hover {
+  background: #f3f4f6;
+}
+
+/* ЧЕРВОНА КНОПКА */
+.menu-dropdown .danger {
+  color: red;
+}

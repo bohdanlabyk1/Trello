@@ -6,10 +6,10 @@ export class AuthUserController {
   constructor(private readonly authUserService: AuthUserService) {}
 
   @Post('register')
-  async register(@Body() body:{username:string, email:string, password:string, repit_password}){
- const { username, email, password, repit_password} = body;
+  async register(@Body() body:{first_name:string, last_name: string, email:string, password:string, repit_password}){
+ const {last_name, first_name, email, password, repit_password} = body;
  try{
-  const user = await this.authUserService.register (username, email, password, repit_password) 
+  const user = await this.authUserService.register (last_name, first_name, email, password, repit_password) 
   const token = await this.authUserService.generateJwtToken(user)
     return { status: 'success', message: 'Реєстрація успішна!', token };
     } catch (error) {

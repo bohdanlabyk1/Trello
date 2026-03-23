@@ -1,7 +1,7 @@
 // project.controller.ts
 import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
-import { ProjectService } from './progect.service';
-import { JwtAuthGuard } from './../auth-user/jwt-auth';
+import { ProjectService } from './project.service';
+import { JwtAuthGuard } from './../user/jwt-auth';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard)

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
-import { Auth } from 'src/auth-user/auth-user.entiti';
+import { Auth } from 'src/user/auth-user.entiti';
 import { ColumnEntity } from 'src/column/column.entity';
 import { Invitation } from 'src/invitation/invitation.entiti';
 import { Sprint} from './../sprint/sprint.entity'
@@ -9,10 +9,10 @@ export class Project {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 100 })
   name: string;
 
-  @Column()
+  @Column({type: 'text'})
   description: string;
 
   // Власник проєкту

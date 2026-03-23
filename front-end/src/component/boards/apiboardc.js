@@ -166,12 +166,15 @@ clearActivityLogs: async (projectId) => {
         });
       },
 
-      moveTaskLocally: (fromCol, toCol, task, index) =>
+     moveTaskLocally: (fromCol, toCol, task, index) =>
         set(state => {
-          const source = [...state.tasks[fromCol]];
+          const source = [...(state.tasks[fromCol] || [])];
           const dest = [...(state.tasks[toCol] || [])];
 
-          source.splice(source.findIndex(t => t.id === task.id), 1);
+          const taskIndex = source.findIndex(t => t.id === task.id);
+          if (taskIndex === -1) return state;
+
+          source.splice(taskIndex, 1);
           dest.splice(index, 0, { ...task, columnId: toCol });
 
           return {
@@ -183,24 +186,30 @@ clearActivityLogs: async (projectId) => {
           };
         }),
 
-  moveTask: async (fromCol, taskId, toCol, order) => {
-  const { token, tasks } = get();
+      moveTask: async (fromCol, taskId, toCol, order) => {
+        const { token } = get();
+        try {
+          await api.moveTask(token, fromCol, taskId, toCol, order);
+        } catch (e) {
+          console.error("Move failed", e);
+        }
+      },
 
-  await api.moveTask(token, fromCol, taskId, toCol, order);
+      addTask: async ({ title, columnId }) => {
+        const { token, tasks } = get();
 
-  const task = tasks[fromCol].find(t => t.id === taskId);
+        const newTask = await api.createTask(token, {
+          title,
+          columnId,
+        });
 
-  set({
-    tasks: {
-      ...tasks,
-      [fromCol]: tasks[fromCol].filter(t => t.id !== taskId),
-      [toCol]: [
-        ...(tasks[toCol] || []),
-        { ...task, columnId: toCol },
-      ],
-    },
-  });
-},
+        set({
+          tasks: {
+            ...tasks,
+            [columnId]: [...(tasks[columnId] || []), newTask],
+          },
+        });
+      },
 
 
     }),

@@ -1,95 +1,84 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getInvitations,
   getSentInvitations,
-  getNotifications, 
+  getNotifications,
   respondInvitation,
-   markNotificationRead, 
+  markNotificationRead,
 } from "../api/api";
 import "./../style/aliert.css";
 
-export default function AllNotificationsPanel({ token, onUpdateCount }) {
+export default function Aliert({ token, onUpdateCount }) {
   const [items, setItems] = useState([]);
+  const isLoadingRef = useRef(false);
 
-  // 🔄 Завантаження ВСІХ сповіщень
+  // ===== LOAD NOTIFICATIONS =====
   const load = async () => {
+    if (!token || isLoadingRef.current) return 0;
+
+    isLoadingRef.current = true;
     try {
-      const received = await getInvitations(token);
-      const sent = await getSentInvitations(token);
-      const notifications = await getNotifications(token); // 🔥 response
+      const [received, sent, notifications] = await Promise.all([
+        getInvitations(token),
+        getSentInvitations(token),
+        getNotifications(token),
+      ]);
 
-      // 📩 Отримані інвайти
-      const formattedReceived = received.map((i) => ({
-        ...i,
-        type: "received",
-      }));
+      const formattedReceived = received.map((i) => ({ ...i, type: "received" }));
+      const formattedSent = sent.map((i) => ({ ...i, type: "sent" }));
+      const formattedNotifications = notifications.map((n) => ({ ...n, type: "notification" }));
 
-      // 📤 Надіслані
-      const formattedSent = sent.map((i) => ({
-        ...i,
-        type: "sent",
-      }));
-
-      // 🔔 Response notifications
-      const formattedNotifications = notifications.map((n) => ({
-        ...n,
-        type: "notification",
-      }));
-
-      const allItems = [
-        ...formattedReceived,
-        ...formattedSent,
-        ...formattedNotifications,
-      ];
+      const allItems = [...formattedReceived, ...formattedSent, ...formattedNotifications];
 
       setItems(allItems);
-
-      // 🔢 Лічильник
-      onUpdateCount?.(allItems.length);
+      onUpdateCount?.(allItems.length); // 🔔 оновлення цифри
+      return allItems.length;
     } catch (e) {
       console.error(e);
+      return 0;
+    } finally {
+      isLoadingRef.current = false;
     }
   };
 
+  // ===== EFFECT =====
   useEffect(() => {
-    if (token) load();
+    if (!token) return;
+
+    load(); // одразу
+
+    const interval = setInterval(() => {
+      load(); // кожні 5 сек
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [token]);
 
-  // ✅ Відповідь на інвайт
+  // ===== RESPOND =====
   const handleRespond = async (id, accept) => {
     try {
       await respondInvitation(token, id, accept);
-
-      // після відповіді перезавантажуємо
       await load();
     } catch (e) {
       console.error(e);
     }
   };
 
-  // 🗑 Видалення notification (локально)
- const removeItem = async (id, type) => {
-  try {
-    // тільки для response notifications
-    if (type === "notification") {
-      await markNotificationRead(token, id);
+  // ===== REMOVE ITEM =====
+  const removeItem = async (id, type) => {
+    try {
+      if (type === "notification") await markNotificationRead(token, id);
+
+      setItems((prev) => {
+        const updated = prev.filter((i) => !(i.id === id && i.type === type));
+        onUpdateCount?.(updated.length);
+        return updated;
+      });
+    } catch (e) {
+      console.error(e);
     }
+  };
 
-    setItems((prev) => {
-      const updated = prev.filter(
-        (i) => !(i.id === id && i.type === type)
-      );
-
-      onUpdateCount?.(updated.length);
-      return updated;
-    });
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-
-  // 📭 Якщо пусто
   if (!items.length) {
     return (
       <div className="notifications-panel">
@@ -109,13 +98,12 @@ export default function AllNotificationsPanel({ token, onUpdateCount }) {
           className="notification-item clickable"
           onClick={() => removeItem(i.id, i.type)}
         >
-          {/* 📩 Отримані */}
+          {/* RECEIVED */}
           {i.type === "received" && (
             <>
               <div>
                 <strong>{i.sender.username}</strong> → {i.project.name}
               </div>
-
               <div className="actions">
                 <button
                   className="accept"
@@ -126,7 +114,6 @@ export default function AllNotificationsPanel({ token, onUpdateCount }) {
                 >
                   ✔
                 </button>
-
                 <button
                   className="reject"
                   onClick={(e) => {
@@ -140,14 +127,12 @@ export default function AllNotificationsPanel({ token, onUpdateCount }) {
             </>
           )}
 
-          {/* 📤 Надіслані */}
+          {/* SENT */}
           {i.type === "sent" && (
             <>
               <div>
-                {i.project.name} →{" "}
-                <strong>{i.recipient.username}</strong>
+                {i.project.name} → <strong>{i.recipient.username}</strong>
               </div>
-
               <div className={`status ${i.status}`}>
                 {i.status === "pending" && "⏳ Очікує"}
                 {i.status === "accepted" && "✔ Прийняв"}
@@ -156,12 +141,8 @@ export default function AllNotificationsPanel({ token, onUpdateCount }) {
             </>
           )}
 
-          {/* 🔔 Response notifications */}
-          {i.type === "notification" && (
-            <div className="notification-text">
-              🔔 {i.message}
-            </div>
-          )}
+          {/* NOTIFICATION */}
+          {i.type === "notification" && <div className="notification-text">🔔 {i.message}</div>}
         </div>
       ))}
     </div>

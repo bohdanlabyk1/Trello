@@ -60,6 +60,7 @@
 }
 
 .notifications-dropdown {
+   display: none; 
   position: absolute;
   top: 45px;
   right: 0;
@@ -69,6 +70,9 @@
   padding: 10px;
   width: 300px;
   z-index: 10001;
+}
+.notifications-dropdown.open {
+  display: block;
 }
 
 .notifications-dropdown h3 {

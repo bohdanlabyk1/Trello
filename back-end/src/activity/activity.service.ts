@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ActivityLog } from './actyviti.entiti';
-import { Auth } from '../auth-user/auth-user.entiti';
-import { Project } from '../progect/project.entiti';
+import { ActivityLog } from './activity.entiti';
+import { Auth } from '../user/auth-user.entiti';
+import { Project } from '../project/project.entiti';
 
 @Injectable()
 export class ActivityService {

@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationController } from './notificatonController';
 import { Notification } from './noification.entiti';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtAuthGuard } from '../auth-user/jwt-auth';
+import { JwtAuthGuard } from '../user/jwt-auth';
 
 @Module({
   imports: [

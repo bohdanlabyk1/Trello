@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ActivityLog } from './actyviti.entiti';
-import { ActivityService } from './actyviti.service';
-import { ActivityController } from './actyviti.controller';
-import { AuthUserModule } from './../auth-user/auth-user.module'; // ✅
+import { ActivityLog } from './activity.entiti';
+import { ActivityService } from './activity.service';
+import { ActivityController } from './activity';
+import { AuthUserModule } from '../user/auth-user.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ActivityLog]), AuthUserModule],

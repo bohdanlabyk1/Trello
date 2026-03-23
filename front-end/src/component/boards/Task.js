@@ -72,13 +72,14 @@ const Task = ({ task, columnId }) => {
           <span className="task-icon">📄</span>
           <span className="task-id">{task.id}</span>
 
-          <input
-            className="task-title-input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={handleTitleBlur}
-            onKeyDown={handleTitleKeyDown}
-          />
+         <textarea
+  className="task-title-input"
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+  onBlur={handleTitleBlur}
+  onKeyDown={handleTitleKeyDown}
+   rows={1}
+/>
         </div>
 
         <div

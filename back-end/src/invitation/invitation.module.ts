@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Invitation } from './invitation.entiti';
 import { InvitationService } from './invitation.service';
 import { InvitationController } from './invitation.controller';
-import { Auth } from 'src/auth-user/auth-user.entiti';
-import { Project } from 'src/progect/project.entiti';
+import { Auth } from 'src/user/auth-user.entiti';
+import { Project } from 'src/project/project.entiti';
 import { Notification } from './noification.entiti';
 import { JwtModule } from '@nestjs/jwt';
 

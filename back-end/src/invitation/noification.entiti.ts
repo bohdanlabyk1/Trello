@@ -1,5 +1,5 @@
 import { Entity, Column, CreateDateColumn,  ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Auth } from './../auth-user/auth-user.entiti';
+import { Auth } from './../user/auth-user.entiti';
 @Entity('notifications')
 export class Notification {
   @PrimaryGeneratedColumn()
@@ -8,7 +8,7 @@ export class Notification {
   @ManyToOne(() => Auth, { onDelete: 'CASCADE' })
   user: Auth;
 
-  @Column()
+  @Column({ length: 100 })
   message: string;
 
   @Column({ default: false })

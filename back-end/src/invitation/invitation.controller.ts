@@ -9,7 +9,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { InvitationService } from './invitation.service';
-import { JwtAuthGuard } from '../auth-user/jwt-auth';
+import { JwtAuthGuard } from '../user/jwt-auth';
 
 @Controller('invitations')
 @UseGuards(JwtAuthGuard)

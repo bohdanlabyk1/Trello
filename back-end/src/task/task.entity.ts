@@ -9,13 +9,13 @@ export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 70 })
   title: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text'})
   description: string;
 
-  @Column({ default: 0 })
+  @Column({ default: 0 ,})
   order: number;
   
   @Column({ default: 'todo' }) 

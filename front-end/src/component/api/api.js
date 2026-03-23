@@ -51,10 +51,12 @@ export const loginUser = (email, password) =>
     body: JSON.stringify({ email, password }),
   });
 
-export const registerUser = (username, email, password, repit_password) =>
+
+  
+export const registerUser = (first_name, last_name, email, password, repit_password) =>
   fetchData("/auth-user/register", {
     method: "POST",
-    body: JSON.stringify({ username, email, password, repit_password }),
+    body: JSON.stringify({  first_name, last_name, email, password, repit_password }),
   });
 
 // ===== PROJECTS =====
@@ -230,3 +232,4 @@ export const markNotificationRead = (token, id) =>
     method: "PATCH",
     token,
   });
+  

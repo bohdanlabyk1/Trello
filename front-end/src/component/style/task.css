@@ -80,6 +80,10 @@
   color: var(--text);
   padding: 2px 4px;
   width: 100%;
+  white-space: normal;
+  overflow: hidden;
+  word-break: break-word;
+  resize: none;
 }
 
 .task-title-input:hover,

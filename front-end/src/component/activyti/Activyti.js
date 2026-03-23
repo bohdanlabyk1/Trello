@@ -63,7 +63,7 @@ const ActivityLog = ({ projectId }) => {
 
             <div className="content">
               <div>
-                <b>{log.user?.username || "User"}</b> {renderText(log)}
+                <b>{log.user?.first_name || "User"}</b> {renderText(log)}
               </div>
               <small>{new Date(log.createdAt).toLocaleString()}</small>
             </div>

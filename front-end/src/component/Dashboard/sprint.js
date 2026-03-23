@@ -14,7 +14,9 @@ const Sprint = ({ projectId }) => {
     tasks,
     loadProjectData,
     addTask,
-     deleteSprint, 
+    deleteSprint,
+    searchQuery,
+    searchType,
   } = useProjectStore();
 
   const [newSprint, setNewSprint] = useState({
@@ -29,8 +31,7 @@ const Sprint = ({ projectId }) => {
   const [activeSprint, setActiveSprint] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
 
-
-  // ===== Load project safely =====
+  // ===== Load project =====
   useEffect(() => {
     if (token && projectId) {
       loadProjectData(projectId);
@@ -38,28 +39,26 @@ const Sprint = ({ projectId }) => {
   }, [token, projectId, loadProjectData]);
 
   // ===== Create sprint =====
- 
-const handleCreateSprint = async () => {
-  if (!newSprint.name || !newSprint.startDate || !newSprint.endDate) {
-    return alert('Заповни всі поля');
-  }
+  const handleCreateSprint = async () => {
+    if (!newSprint.name || !newSprint.startDate || !newSprint.endDate) {
+      return alert('Заповни всі поля');
+    }
 
-  try {
-    await api.createSprint(token, {
-      ...newSprint,
-      projectId,
-    });
+    try {
+      await api.createSprint(token, {
+        ...newSprint,
+        projectId,
+      });
 
-    await loadProjectData(projectId);
-    setNewSprint({ name: '', startDate: '', endDate: '' });
-  } catch (err) {
-    console.error(err);
-    alert('Не вдалося створити спринт');
-  }
-};
+      await loadProjectData(projectId);
+      setNewSprint({ name: '', startDate: '', endDate: '' });
+    } catch (err) {
+      console.error(err);
+      alert('Не вдалося створити спринт');
+    }
+  };
 
-
-  // ===== Create task (SAFE) =====
+  // ===== Create task =====
   const handleCreateTask = async () => {
     if (!newTaskTitle.trim()) return alert('Введи назву задачі');
     if (!selectedSprintId) return alert('Спринт не вибраний');
@@ -79,20 +78,33 @@ const handleCreateSprint = async () => {
     setSelectedSprintId(null);
   };
 
-  // ===== Utils =====
+  // ===== All tasks =====
   const allTasks = useMemo(
     () => Object.values(tasks).flat(),
     [tasks]
   );
 
+  // ===== Progress =====
   const calculateProgress = sprint => {
     const sprintTasks = allTasks.filter(t => t.sprintId === sprint.id);
     if (!sprintTasks.length) return 0;
+
     const done = sprintTasks.filter(t => t.status === 'done').length;
     return Math.round((done / sprintTasks.length) * 100);
   };
 
-  // ===== Sprint view =====
+  // ===== 🔍 FILTER SPRINTS =====
+  const filteredSprints = useMemo(() => {
+    if (searchType !== 'sprint' || !searchQuery.trim()) {
+      return sprints;
+    }
+
+    return sprints.filter(sprint =>
+      sprint.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [sprints, searchQuery, searchType]);
+
+  // ===== Sprint details =====
   if (activeSprint) {
     return (
       <SprintTasks
@@ -137,74 +149,77 @@ const handleCreateSprint = async () => {
 
       {/* ===== Sprint list ===== */}
       <div className="sprint-list">
-        {sprints.map(sprint => {
-          const sprintTasks = allTasks.filter(
-            t => t.sprintId === sprint.id
-          );
+        {filteredSprints.length === 0 ? (
+          <p>Нічого не знайдено 😢</p>
+        ) : (
+          filteredSprints.map(sprint => {
+            const sprintTasks = allTasks.filter(
+              t => t.sprintId === sprint.id
+            );
 
-          return (
-            <div key={sprint.id} className="sprint-card">
-  <div className="sprint-header">
-    <h3 onClick={() => setActiveSprint(sprint)}>{sprint.name}</h3>
+            return (
+              <div key={sprint.id} className="sprint-card">
+              <div className="sprint-header">
+  <h3 onClick={() => setActiveSprint(sprint)}>
+    {sprint.name}
+  </h3>
 
-    {/* ⋮ menu */}
-    <div className="sprint-menu">
-      <button
-        className="menu-btn"
-        onClick={() =>
-          setOpenMenuId(openMenuId === sprint.id ? null : sprint.id)
-        }
-      >
-        ⋮
-      </button>
+  <div className="sprint-menu">
+    <button
+      className="menu-btn"
+      onClick={() =>
+        setOpenMenuId(
+          openMenuId === sprint.id ? null : sprint.id
+        )
+      }
+    >
+      ⋮
+    </button>
 
-      {openMenuId === sprint.id && (
-        <div className="menu-dropdown">
-          <button
-            className="danger"
-            onClick={async () => {
-              if (window.confirm('Видалити спринт?')) {
-                await deleteSprint(sprint.id);
-                setOpenMenuId(null);
-              }
-            }}
-          >
-            🗑 Видалити спринт
-          </button>
-        </div>
-      )}
-    </div>
+    {openMenuId === sprint.id && (
+      <div className="menu-dropdown">
+        <button
+          className="danger"
+          onClick={async () => {
+            if (window.confirm('Видалити спринт?')) {
+              await deleteSprint(sprint.id);
+              setOpenMenuId(null);
+            }
+          }}
+        >
+          🗑 Видалити спринт
+        </button>
+      </div>
+    )}
   </div>
+</div>
+                <p>📅 {sprint.startDate} → {sprint.endDate}</p>
+                <p>🧩 Завдань: {sprintTasks.length}</p>
+                <p>📊 Прогрес: {calculateProgress(sprint)}%</p>
 
-  {/* 📅 Dates */}
-  <p>📅 {sprint.startDate} → {sprint.endDate}</p>
+                <button
+                  onClick={() => {
+                    setSelectedSprintId(sprint.id);
+                    setShowTaskModal(true);
+                  }}
+                >
+                  ➕ Створити задачу
+                </button>
 
-  <p>🧩 Завдань: {sprintTasks.length}</p>
-  <p>📊 Прогрес: {calculateProgress(sprint)}%</p>
-
-  <button
-    onClick={() => {
-      setSelectedSprintId(sprint.id);
-      setShowTaskModal(true);
-    }}
-  >
-    ➕ Створити задачу
-  </button>
-
-
-              <div className="sprint-tasks">
-                {sprintTasks.map(task => (
-                  <Task
-                    key={task.id}
-                    task={task}
-                    columnId={task.columnId}
-                    sprintId={sprint.id}
-                  />
-                ))}
+                <div className="sprint-tasks">
+                  {sprintTasks.map(task => (
+                    <Task
+                      key={task.id}
+                      task={task}
+                      columnId={task.columnId}
+                      sprintId={sprint.id}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       {/* ===== Modal ===== */}

@@ -1,7 +1,7 @@
 // column.controller.ts
 import { Controller, Get, Post, Param, Body, Patch, Delete, Req, UseGuards } from '@nestjs/common';
 import { ColumnService } from './column.service';
-import { JwtAuthGuard } from './../auth-user/jwt-auth';
+import { JwtAuthGuard } from './../user/jwt-auth';
 
 @Controller('projects')
 @UseGuards(JwtAuthGuard)

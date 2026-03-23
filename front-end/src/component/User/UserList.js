@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getProjectUsers } from "./../api/api";
 import UsersModal from "./User";
 import "./../style/user.css";
+import { useProjectStore } from './../boards/apiboardc';
 
 export default function UsersList({ token, projectId }) {
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
+
+  const { searchQuery, searchType } = useProjectStore();
 
   const loadUsers = async () => {
     try {
@@ -22,9 +25,27 @@ export default function UsersList({ token, projectId }) {
     }
   }, [token, projectId]);
 
+  // ===== 🔍 FILTER USERS =====
+  const filteredUsers = useMemo(() => {
+    if (searchType !== 'user' || !searchQuery.trim()) {
+      return users;
+    }
+
+    return users.filter(u => {
+      const fullName = `${u.first_name || ''} ${u.last_name || ''}`.toLowerCase();
+      const email = u.email.toLowerCase();
+      const query = searchQuery.toLowerCase();
+
+      return (
+        fullName.includes(query) ||
+        email.includes(query)
+      );
+    });
+  }, [users, searchQuery, searchType]);
+
   return (
     <div className="users-wrapper">
-      
+
       {/* Header */}
       <div className="users-header">
         <h3 className="users-title">
@@ -41,16 +62,16 @@ export default function UsersList({ token, projectId }) {
 
       {/* Users list */}
       <div className="users-list">
-        {users.map((u) => (
+        {filteredUsers.map((u) => (
           <div key={u.id} className="user-card">
-            
+
             <div className="user-avatar">
               {u.email[0].toUpperCase()}
             </div>
 
             <div className="user-info">
               <span className="user-name">
-                {u.name || "User"}
+                {`${u.first_name || ""} ${u.last_name || ""}`.trim() || "User"}
               </span>
 
               <span className="user-email">
@@ -60,9 +81,9 @@ export default function UsersList({ token, projectId }) {
           </div>
         ))}
 
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <p className="empty-text">
-            Поки що немає користувачів 🙃
+            Нічого не знайдено 😢
           </p>
         )}
       </div>

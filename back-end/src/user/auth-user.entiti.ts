@@ -1,21 +1,24 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from "typeorm";
-import { Project } from "./../progect/project.entiti";
-import { Notification } from './../invitation/noification.entiti';
+import { Project } from "../project/project.entiti";
+import { Notification } from '../invitation/noification.entiti';
 import { Invitation } from "src/invitation/invitation.entiti";
-import {ActivityLog} from './../actyviti/actyviti.entiti'
+import {ActivityLog} from '../activity/activity.entiti'
 
 @Entity('auths')
 export class Auth {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  username: string;
+   @Column({ length:40 })
+  first_name: string;
 
-  @Column({ unique: true })
+  @Column({ length: 40 })
+  last_name: string;
+
+  @Column({ unique: true, length: 100 })
   email: string;
 
-  @Column()
+  @Column({ length: 150 })
   password: string;
 
   @OneToMany(() => Project, (project) => project.owner)

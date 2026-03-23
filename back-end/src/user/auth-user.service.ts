@@ -13,7 +13,7 @@ export class AuthUserService {
         private jwtService: JwtService,
     ) {}
 
-    async register(username: string, email: string, password: string, repit_password: string): Promise<Auth> {
+    async register(last_name:string, first_name: string, email: string, password: string, repit_password: string): Promise<Auth> {
         if (password !== repit_password) {
             throw new HttpException('паролі не співпадають', HttpStatus.BAD_REQUEST);
         }
@@ -36,7 +36,8 @@ export class AuthUserService {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const auth = this.authRepositori.create({
-             username,
+            last_name,
+            first_name,
             email,
             password: hashedPassword,
         });
@@ -59,7 +60,7 @@ export class AuthUserService {
     }
 
     public generateJwtToken(user: Auth): string {
-        const payload = { email: user.email, username: user.username, id: user.id };
+        const payload = { email: user.email, username: user.first_name, id: user.id };
         return this.jwtService.sign(payload);
     }
 }

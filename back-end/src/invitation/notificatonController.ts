@@ -3,7 +3,7 @@ import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './noification.entiti';
-import { JwtAuthGuard } from '../auth-user/jwt-auth';
+import { JwtAuthGuard } from '../user/jwt-auth';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)

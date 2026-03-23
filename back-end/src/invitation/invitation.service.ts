@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Invitation } from './invitation.entiti';
 import { Notification } from './noification.entiti';
-import { Auth } from 'src/auth-user/auth-user.entiti';
-import { Project } from 'src/progect/project.entiti';
+import { Auth } from 'src/user/auth-user.entiti';
+import { Project } from 'src/project/project.entiti';
 
 @Injectable()
 export class InvitationService {
@@ -137,7 +137,7 @@ async markAsRead(
     await this.notificationsRepo.save(
       this.notificationsRepo.create({
         user: recipient,
-        message: `${sender.username} запросив вас до проєкту "${project.name}"`,
+        message: `${sender.first_name} запросив вас до проєкту "${project.name}"`,
       }),
     );
 
@@ -245,7 +245,7 @@ async markAsRead(
         this.notificationsRepo.create(
           {
             user: invite.sender,
-            message: `${invite.recipient.username} прийняв запрошення до проєкту "${project.name}"`,
+            message: `${invite.recipient.first_name} прийняв запрошення до проєкту "${project.name}"`,
           },
         ),
       );
@@ -259,7 +259,7 @@ async markAsRead(
         this.notificationsRepo.create(
           {
             user: invite.sender,
-            message: `${invite.recipient.username} відхилив запрошення до проєкту "${invite.project.name}"`,
+            message: `${invite.recipient.first_name} відхилив запрошення до проєкту "${invite.project.name}"`,
           },
         ),
       );

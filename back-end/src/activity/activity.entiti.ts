@@ -1,6 +1,6 @@
 import { Entity,PrimaryGeneratedColumn, Column,CreateDateColumn, ManyToOne, RelationId} from 'typeorm';
-import { Auth } from '../auth-user/auth-user.entiti';
-import { Project } from '../progect/project.entiti';
+import { Auth } from '../user/auth-user.entiti';
+import { Project } from '../project/project.entiti';
 
 @Entity('activity_logs')
 export class ActivityLog {
@@ -18,7 +18,7 @@ export class ActivityLog {
   })
   project: Project;
 
-  @Column()
+  @Column({ length: 100 })
   action: string;
 
   @RelationId((log: ActivityLog) => log.project)

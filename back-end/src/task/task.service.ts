@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Task } from './task.entity';
 import { Sprint } from 'src/sprint/sprint.entity';
 import { UpdateTaskDto } from './task.dto';
-import { ActivityService } from 'src/actyviti/actyviti.service';
+import { ActivityService } from 'src/activity/activity.service';
 import { ColumnEntity } from 'src/column/column.entity';
 
 @Injectable()

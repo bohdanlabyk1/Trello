@@ -2,9 +2,9 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ColumnEntity } from './../column/column.entity';
+import { ColumnEntity } from '../column/column.entity';
 import { Project } from './project.entiti';
-import { Auth } from './../auth-user/auth-user.entiti';
+import { Auth } from '../user/auth-user.entiti';
 
 @Injectable()
 export class ProjectService {

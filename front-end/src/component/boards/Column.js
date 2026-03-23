@@ -66,7 +66,7 @@ const Column = ({ column, tasks, isDragDisabled }) => {
             {...provided.droppableProps}
             style={{ minHeight: 50 }}
           >
-            {tasks.map((task, index) => (
+            {(tasks || []).map((task, index) => (
               <Draggable
                 key={task.id}
                 draggableId={String(task.id)}

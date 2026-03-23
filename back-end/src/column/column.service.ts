@@ -2,7 +2,7 @@ import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ColumnEntity } from './column.entity';
-import { Project } from './../progect/project.entiti';
+import { Project } from './../project/project.entiti';
 
 @Injectable()
 export class ColumnService {

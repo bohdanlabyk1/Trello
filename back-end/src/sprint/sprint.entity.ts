@@ -1,6 +1,6 @@
-// sprint.entity.ts
+
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
-import { Project } from './../progect/project.entiti';
+import { Project } from './../project/project.entiti';
 import { Task } from 'src/task/task.entity';
 
 @Entity('sprints')
@@ -8,7 +8,7 @@ export class Sprint {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 100 })
   name: string;
 
   @Column({ type: 'date' })

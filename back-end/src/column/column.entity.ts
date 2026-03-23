@@ -1,6 +1,6 @@
 // column.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column as Column, ManyToOne, OneToMany } from "typeorm";
-import { Project } from "../progect/project.entiti";
+import { Project } from "../project/project.entiti";
 import { Task } from "./../task/task.entity";
 
 @Entity('columns')
@@ -8,7 +8,7 @@ export class ColumnEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ length: 100 })
   title: string;
  @Column({ default: '#3b82f6' })
   color: string;

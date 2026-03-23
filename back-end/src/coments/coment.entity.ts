@@ -7,7 +7,7 @@ export class Comment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({type: 'text'})
   text: string;
 
   @ManyToOne(() => Task, (task) => task.comments, { onDelete: 'CASCADE' })

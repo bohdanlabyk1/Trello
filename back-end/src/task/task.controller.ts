@@ -1,7 +1,7 @@
 // task.controller.ts
 import { Controller, Get, Post, Param, Body, Patch, Delete, Req, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { JwtAuthGuard } from './../auth-user/jwt-auth';
+import { JwtAuthGuard } from '../user/jwt-auth';
 import { Task } from './task.entity';
 import { UpdateTaskDto } from './task.dto';
 

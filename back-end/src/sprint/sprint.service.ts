@@ -2,8 +2,8 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Sprint } from './sprint.entity';
-import { Project } from './../progect/project.entiti';
-import { Auth } from './../auth-user/auth-user.entiti';
+import { Project } from './../project/project.entiti';
+import { Auth } from './../user/auth-user.entiti';
 
 @Injectable()
 export class SprintService {

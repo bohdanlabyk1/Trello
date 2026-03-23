@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { SprintService } from './sprint.service';
-import { JwtAuthGuard } from 'src/auth-user/jwt-auth';
+import { JwtAuthGuard } from 'src/user/jwt-auth';
 
 @Controller('sprints')
 @UseGuards(JwtAuthGuard)
