@@ -54,9 +54,9 @@ export default function UsersModal({
   }, [onClose]);
 
 return (
-  <div className="modal-overlay" onClick={onClose}>
+  <div className="modal-overlay2" onClick={onClose}>
     <div
-      className="modal-content"
+      className="modal-content2"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
