@@ -1,5 +1,4 @@
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3002";
-
+const BASE_URL = "https://trello-1-c24y.onrender.com";
 const fetchData = async (endpoint, options = {}) => {
   const token = options.token || localStorage.getItem("token");
 
