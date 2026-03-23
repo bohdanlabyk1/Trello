@@ -14,21 +14,13 @@ import { Notification } from 'src/invitation/noification.entiti';
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      // ВИПРАВЛЕНО: прибрали зайві лапки навколо process.env.DB_HOST
-      host: process.env.DB_HOST, 
-      // ВИПРАВЛЕНО: додали значення за замовчуванням для порту, якщо змінна порожня
-      port: parseInt(process.env.DB_PORT) || 14176, 
-      username: process.env.DB_USERNAME, 
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: 'localhost',
+      port: 3306, 
+      username: 'root', 
+      password: '1111', 
+      database: 'teamtrack',
       autoLoadEntities: true,
-      synchronize: true, // Це створить твої таблиці автоматично
-      
-      // ОБОВ'ЯЗКОВО ДЛЯ AIVEN: без цього буде помилка SSL
-      ssl: {
-        rejectUnauthorized: false
-      },
-      
+      synchronize: true,
       entities: [Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog, Notification], 
     }),
     TypeOrmModule.forFeature([Auth, Project, ColumnEntity, Comment, Task, Invitation, Sprint, ActivityLog, Notification]),
