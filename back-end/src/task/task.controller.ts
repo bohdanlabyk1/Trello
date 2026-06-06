@@ -2,6 +2,7 @@
 import { Controller, Get, Post, Param, Body, Patch, Delete, Req, UseGuards } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { JwtAuthGuard } from '../user/jwt-auth';
+import { Roles } from './../user/role.decorator'; 
 import { Task } from './task.entity';
 import { UpdateTaskDto } from './task.dto';
 
@@ -16,6 +17,7 @@ export class TaskController {
   }
 
   @Post()
+  @Roles('manager')
   create(
     @Param('columnId') columnId: number,
     @Body('title') title: string,
@@ -27,6 +29,7 @@ export class TaskController {
   }
 
   @Delete(':id')
+  @Roles('manager')
   remove(@Param('id') id: number, @Req() req) {
     return this.taskService.delete(id, req.user.id);
   }

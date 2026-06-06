@@ -16,14 +16,14 @@ const statusLabel = (status) => {
 const labelColors = ['green', 'red', 'yellow'];
 
 const Task = ({ task, columnId }) => {
-  const { deleteTask, loadComments, comments, updateTask } = useProjectStore();
+  const { deleteTask, loadComments, comments, updateTask,  user } = useProjectStore();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [label, setLabel] = useState(task.label || '');
   const [title, setTitle] = useState(task.title);
   const menuRef = useRef(null);
-
+const canManage = user?.role === 'manager' ;
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -69,8 +69,7 @@ const Task = ({ task, columnId }) => {
       <div className="task-top">
         <div className="task-left">
           {label && <span className={`task-label-dot ${label}`} />}
-          <span className="task-icon">📄</span>
-          <span className="task-id">{task.id}</span>
+        
 
          <textarea
   className="task-title-input"
@@ -124,31 +123,38 @@ const Task = ({ task, columnId }) => {
 
       </div>
 
-    <div className="task-menu-section">
+   <div className="task-menu-section">
   <div className="color-picker">
     {labelColors.map(color => (
       <span
         key={color}
         className={`color-circle ${color} ${label === color ? 'active' : ''}`}
-        onClick={() => handleChangeLabel(color)}
+        style={{ 
+          cursor: canManage ? 'pointer' : 'not-allowed',
+          opacity: !canManage && label !== color && label !== '' ? 0.5 : 1 
+        }}
+        onClick={() => {
+          if (canManage) {
+            handleChangeLabel(color);
+          }
+        }}
       />
     ))}
   </div>
 </div>
-
-      <div className="task-menu-section danger">
-        <div
-          className="task-menu-item delete"
-          onClick={handleDelete}
-        >
-          🗑 Delete task
+      {canManage && (
+              <div className="task-menu-section danger">
+                <div
+                  className="task-menu-item delete"
+                  onClick={handleDelete}
+                >
+                  🗑 Delete task
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-
-    </div>
-  </div>
-)}
-
+      )}
 
       {showComments && (
         <CommentList

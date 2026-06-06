@@ -1,5 +1,6 @@
 import { Controller, Post, Get, Body, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { SprintService } from './sprint.service';
+import { Roles } from './../user/role.decorator'; 
 import { JwtAuthGuard } from 'src/user/jwt-auth';
 
 @Controller('sprints')
@@ -18,6 +19,7 @@ create(@Body() body: { name: string; startDate: string; endDate: string; project
   }
 
   @Delete(':id')
+  @Roles('manager')
   delete(@Param('id') id: number) {
     return this.sprintService.delete(id);
   }

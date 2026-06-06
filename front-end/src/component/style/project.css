@@ -17,6 +17,58 @@ body[data-theme='dark'] {
   --muted: #9ca3af;
   --primary: #4f7cff;
 }
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* кнопка ⋮ */
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  color: #000; 
+  line-height: 1;
+}
+
+.menu-btn:hover {
+  background: none;
+  color: #000;
+}
+
+.project-menu {
+  position: relative;
+}
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background: var(--card);
+ 
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  z-index: 100;
+  min-width: 140px;
+}
+
+/* кнопки */
+.menu-dropdown button {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.menu-dropdown button:hover {
+  background: var(--bg);
+}
+
 
 .projects {
   padding: 40px 20px;

@@ -45,7 +45,7 @@ const ActivityLog = ({ projectId }) => {
   return (
     <div className="activity-log">
       <div className="activity-header">
-        <h3>🕒 Activity Log</h3>
+        <h3>🕒 Активність</h3>
 
         {activityLogs.length > 0 && (
           <button className="clear-log-btn" onClick={handleClear}>

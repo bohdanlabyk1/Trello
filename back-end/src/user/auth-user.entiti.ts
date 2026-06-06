@@ -15,6 +15,14 @@ export class Auth {
   @Column({ length: 40 })
   last_name: string;
 
+ @Column({
+    type: 'enum',
+    enum: [ 'manager', 'developer'],
+    default: 'developer',
+  })
+  role: string;
+
+
   @Column({ unique: true, length: 100 })
   email: string;
 

@@ -12,7 +12,6 @@ export default function Aliert({ token, onUpdateCount }) {
   const [items, setItems] = useState([]);
   const isLoadingRef = useRef(false);
 
-  // ===== LOAD NOTIFICATIONS =====
   const load = async () => {
     if (!token || isLoadingRef.current) return 0;
 

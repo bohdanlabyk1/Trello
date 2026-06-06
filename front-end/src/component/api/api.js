@@ -1,4 +1,4 @@
-const BASE_URL = "https://trello-1-c24y.onrender.com";
+const BASE_URL = "http://localhost:3002";
 const fetchData = async (endpoint, options = {}) => {
   const token = options.token || localStorage.getItem("token");
 

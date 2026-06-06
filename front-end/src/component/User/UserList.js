@@ -8,7 +8,8 @@ export default function UsersList({ token, projectId }) {
   const [users, setUsers] = useState([]);
   const [open, setOpen] = useState(false);
 
-  const { searchQuery, searchType } = useProjectStore();
+  const { searchQuery, searchType, user } = useProjectStore();
+const canInvite = user?.role === 'manager';
 
   const loadUsers = async () => {
     try {
@@ -52,12 +53,14 @@ export default function UsersList({ token, projectId }) {
           👥 Користувачі
         </h3>
 
-        <button
-          onClick={() => setOpen(true)}
-          className="invite-open-btn"
-        >
-          + Запросити
-        </button>
+      {canInvite && (
+  <button
+    onClick={() => setOpen(true)}
+    className="invite-open-btn"
+  >
+    + Запросити
+  </button>
+)}
       </div>
 
       {/* Users list */}

@@ -5,6 +5,7 @@ import { AuthUserService } from './auth-user.service';
 import { AuthUserController } from './auth-user.controller';
 import { Auth } from './auth-user.entiti';
 import { JwtAuthGuard } from './jwt-auth';
+import { RolesGuard } from './roles.guard';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { JwtAuthGuard } from './jwt-auth';
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  providers: [AuthUserService, JwtAuthGuard],
+  providers: [AuthUserService, JwtAuthGuard, RolesGuard],
   controllers: [AuthUserController],
   exports: [JwtAuthGuard, JwtModule], 
 })

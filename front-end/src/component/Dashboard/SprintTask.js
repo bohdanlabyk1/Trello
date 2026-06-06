@@ -1,27 +1,41 @@
-import React from 'react';
+import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useProjectStore } from './../boards/apiboardc';
+import './../style/sprint.css';
 import Task from './../boards/Task';
 
-const SprintTasks = ({ sprint, onBack }) => {
-  const tasks = useProjectStore(state => state.tasks ?? {});
+const SprintTasks = () => {
+  const { sprintId, projectId } = useParams();
+  const navigate = useNavigate();
+
+  const { tasks, sprints, loadProjectData } = useProjectStore();
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (token && projectId) {
+      loadProjectData(projectId);
+    }
+  }, [token, projectId, loadProjectData]);
+
+  const sprint = sprints.find(s => String(s.id) === String(sprintId));
 
   if (!sprint) {
     return (
       <div>
-        <button onClick={onBack}>← Назад</button>
+        <button className="back-btn" onClick={() => navigate(-1)}>← Назад</button>
         <p>Спринт не знайдений</p>
       </div>
     );
   }
 
-  // ✅ Всі задачі спринту
   const sprintTasks = Object.values(tasks)
     .flat()
-    .filter(t => t.sprintId === sprint.id);
+    .filter(t => String(t.sprintId) === String(sprint.id));
 
   return (
     <div className="sprint-tasks">
-      <button onClick={onBack}>← Назад</button>
+      <button onClick={() => navigate(-1)}>← Назад</button>
       <h2>{sprint.name}</h2>
 
       {sprintTasks.length === 0 ? (
@@ -34,5 +48,4 @@ const SprintTasks = ({ sprint, onBack }) => {
     </div>
   );
 };
-
-export default SprintTasks;
+export default SprintTasks

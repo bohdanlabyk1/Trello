@@ -40,6 +40,7 @@ export class AuthUserService {
             first_name,
             email,
             password: hashedPassword,
+             role: 'developer',
         });
         return this.authRepositori.save(auth);
     }
@@ -60,7 +61,37 @@ export class AuthUserService {
     }
 
     public generateJwtToken(user: Auth): string {
-        const payload = { email: user.email, username: user.first_name, id: user.id };
+        const payload = { email: user.email, username: user.first_name, id: user.id,  role: user.role,};
         return this.jwtService.sign(payload);
     }
+    async changeRole(id: number, role: string) {
+
+    const allowedRoles = [
+        'admin',
+        'manager',
+        'developer',
+    ];
+
+    if (!allowedRoles.includes(role)) {
+        throw new HttpException(
+            'Невірна роль',
+            HttpStatus.BAD_REQUEST,
+        );
+    }
+
+    const user = await this.authRepositori.findOne({
+        where: { id },
+    });
+
+    if (!user) {
+        throw new HttpException(
+            'Користувач не знайдений',
+            HttpStatus.NOT_FOUND,
+        );
+    }
+
+    user.role = role;
+
+    return this.authRepositori.save(user);
+}
 }

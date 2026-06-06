@@ -4,6 +4,7 @@ import { Authform } from "./component/Authform/Authform";
 import Dashboard from "./component/Dashboard/Dashboard";
 import Header from "./component/Header/Header";
 import Project from "./component/Project/Project";
+import SprintTasks from "./component/Dashboard/SprintTask";
 import { useProjectStore } from "./component/boards/apiboardc";
 import "./component/style/app.css";
 
@@ -35,7 +36,9 @@ function MainLayout() {
           path="/dashboard"
           element={<Project ismodal={ismodal} setIsmodal={setIsmodal} />}
         />
-        <Route path="/project/:id" element={<Dashboard />} />
+       <Route path="/project/:id" element={<Dashboard />}>
+  <Route path="sprint/:sprintId" element={<SprintTasks />} />
+</Route>
       </Routes>
     </>
   );

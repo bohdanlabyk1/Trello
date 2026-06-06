@@ -33,7 +33,6 @@ export const Authform = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ===== VALIDATION =====
     if (!isLogin) {
       if (!formData.first_name || !formData.last_name) {
         setMessage("Ім'я та прізвище обов'язкові");
@@ -93,7 +92,6 @@ export const Authform = () => {
         <form onSubmit={handleSubmit}>
           <h1>{isLogin ? "Login" : "Register"}</h1>
 
-          {/* ===== REGISTER FIELDS ===== */}
           {!isLogin && (
             <>
               <div className="input-group">

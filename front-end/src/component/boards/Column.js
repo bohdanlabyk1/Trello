@@ -1,37 +1,35 @@
-import React, { useState } from 'react';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
-import Task from './Task';
-import { useProjectStore } from './apiboardc';
-import './../style/style.css';
+import React, { useState } from "react";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
+import Task from "./Task";
+import { useProjectStore } from "./apiboardc";
+import "./../style/style.css";
 
 const Column = ({ column, tasks, isDragDisabled }) => {
-  const {
-    updateColumnTitle,
-    deleteColumn,
-    addTask,
-    updateColumnColor
-  } = useProjectStore();
+  const { user, updateColumnTitle, deleteColumn, addTask, updateColumnColor } =
+    useProjectStore();
 
   const [title, setTitle] = useState(column.title);
   const [menuOpen, setMenuOpen] = useState(false);
   const [addingTask, setAddingTask] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+
+  const canInvuate = user?.role === "manager";
 
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) return;
-   await addTask({
-  title: newTaskTitle,
-  columnId: column.id,
-});
+    await addTask({
+      title: newTaskTitle,
+      columnId: column.id,
+    });
 
-    setNewTaskTitle('');
+    setNewTaskTitle("");
     setAddingTask(false);
   };
 
   return (
     <div
       className="column"
-      style={{ border: `4px solid ${column.color || '#3b82f6'}` }}
+      style={{ border: `4px solid ${column.color || "#3b82f6"}` }}
     >
       <div className="column-header">
         <input
@@ -43,11 +41,11 @@ const Column = ({ column, tasks, isDragDisabled }) => {
 
         <input
           type="color"
-          value={column.color || '#3b82f6'}
+          value={column.color || "#3b82f6"}
           onChange={(e) => updateColumnColor(column.id, e.target.value)}
         />
 
-        <button onClick={() => setMenuOpen(p => !p)}>⋮</button>
+        <button onClick={() => setMenuOpen((p) => !p)}>⋮</button>
 
         {menuOpen && (
           <div className="menu-dropdown">
@@ -90,22 +88,21 @@ const Column = ({ column, tasks, isDragDisabled }) => {
           </div>
         )}
       </Droppable>
-
-      <div className="add-task-plus">
-        {addingTask ? (
-          <input
-            autoFocus
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-            onBlur={() => setAddingTask(false)}
-          />
-        ) : (
-          <button onClick={() => setAddingTask(true)}>
-            ＋ Add Task
-          </button>
-        )}
-      </div>
+      {canInvuate && (
+        <div className="add-task-plus">
+          {addingTask ? (
+            <input
+              autoFocus
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
+              onBlur={() => setAddingTask(false)}
+            />
+          ) : (
+            <button onClick={() => setAddingTask(true)}>＋ Add Task</button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

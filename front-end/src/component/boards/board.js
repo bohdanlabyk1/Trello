@@ -6,11 +6,14 @@ import { useProjectStore } from './apiboardc';
 const Board = ({ projectId }) => {
   const {
     columns,
-    tasks,
-    loadProjectData,
-    moveTaskLocally,
-    moveTask,
-    token,
+  tasks,
+  loadProjectData,
+  moveTaskLocally,
+  moveTask,
+  token,
+  sprints,
+  selectedSprintId,
+  setSelectedSprintId,
   } = useProjectStore();
 
   useEffect(() => {
@@ -37,14 +40,41 @@ const Board = ({ projectId }) => {
   };
 
   const visibleColumns = useMemo(() => {
-    return columns.map(col => ({
-      ...col,
-      visibleTasks: tasks[col.id] || [],
-    }));
-  }, [columns, tasks]);
+  return columns.map(col => {
+    const columnTasks = tasks[col.id] || [];
 
+    const filteredTasks =
+      selectedSprintId === 'all'
+        ? columnTasks
+        : columnTasks.filter(
+            t => String(t.sprintId) === String(selectedSprintId)
+          );
+
+    return {
+      ...col,
+      visibleTasks: filteredTasks,
+    };
+  });
+}, [columns, tasks, selectedSprintId]);
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <div>
+     <select
+  className="sprint-select"
+  value={selectedSprintId}
+  onChange={(e) =>
+    setSelectedSprintId(
+      e.target.value === 'all' ? 'all' : Number(e.target.value)
+    )
+  }
+>
+  <option value="all">Backlog</option>
+  {sprints.map((sprint) => (
+    <option key={sprint.id} value={sprint.id}>
+      {sprint.name}
+    </option>
+  ))}
+</select>
+<DragDropContext onDragEnd={onDragEnd}>
       <div style={{ display: 'flex', gap: 16 }}>
         {visibleColumns.map(col => (
           <Column
@@ -55,6 +85,8 @@ const Board = ({ projectId }) => {
         ))}
       </div>
     </DragDropContext>
+    </div>
+    
   );
 };
 
